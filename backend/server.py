@@ -11,10 +11,6 @@ from typing import List
 import uuid
 from datetime import datetime
 
-# Import auth routes and models
-from routes.auth import router as auth_router
-from models.auth import User, Session, PasswordResetToken
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -41,21 +37,6 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
-# Dependency injection for database
-async def get_database():
-    return db
-
-# Update auth router to use our database dependency
-def update_auth_router_dependencies():
-    for route in auth_router.routes:
-        if hasattr(route, 'dependant') and route.dependant:
-            # Replace the get_db dependency with our database instance
-            for i, dep in enumerate(route.dependant.dependencies):
-                if hasattr(dep, 'call') and dep.call.__name__ == 'get_db':
-                    route.dependant.dependencies[i].call = get_database
-
-update_auth_router_dependencies()
-
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
@@ -72,9 +53,6 @@ async def create_status_check(input: StatusCheckCreate):
 async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
-
-# Include auth router in API router
-api_router.include_router(auth_router)
 
 # Include the router in the main app
 app.include_router(api_router)
