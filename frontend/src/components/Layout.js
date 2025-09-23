@@ -77,61 +77,85 @@ const Layout = ({ children }) => {
         </div>
       </nav>
 
-      {/* Sidebar */}
-      <div className="flex pt-16">
-        {/* Mobile sidebar overlay */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-        {/* Sidebar */}
-        <div className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0 pt-16
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}>
-          <div className="flex flex-col h-full">
-            {/* Close button for mobile */}
-            <div className="flex justify-end p-4 lg:hidden">
-              <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>
-                <X className="h-6 w-6" />
-              </Button>
-            </div>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:pt-16">
+        <div className="flex flex-col flex-1 min-h-0 bg-white border-r border-gray-200">
+          <nav className="flex-1 px-4 py-4 space-y-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`
+                    group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200
+                    ${isActive(item.href)
+                      ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }
+                  `}
+                >
+                  <Icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 px-4 pb-4 space-y-2">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`
-                      group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200
-                      ${isActive(item.href)
-                        ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                      }
-                    `}
-                  >
-                    <Icon className="mr-3 h-5 w-5" />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </nav>
+      {/* Mobile Sidebar */}
+      <div className={`
+        lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out pt-16
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="flex flex-col h-full border-r border-gray-200">
+          {/* Close button for mobile */}
+          <div className="flex justify-end p-4">
+            <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>
+              <X className="h-6 w-6" />
+            </Button>
           </div>
-        </div>
 
-        {/* Main content */}
-        <div className="flex-1 lg:ml-64">
-          <main className="p-6">
-            {children}
-          </main>
+          {/* Navigation */}
+          <nav className="flex-1 px-4 pb-4 space-y-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`
+                    group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200
+                    ${isActive(item.href)
+                      ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }
+                  `}
+                >
+                  <Icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
+      </div>
+
+      {/* Main content */}
+      <div className="lg:pl-64 pt-16">
+        <main className="p-4 sm:p-6">
+          {children}
+        </main>
       </div>
     </div>
   );
