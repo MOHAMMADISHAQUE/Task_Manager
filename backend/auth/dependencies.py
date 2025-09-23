@@ -41,7 +41,11 @@ async def get_current_user(request: Request, db: AsyncIOMotorDatabase):
         )
     
     # Check if session is expired
-    if session["expires_at"] < datetime.now(timezone.utc):
+    expires_at = session["expires_at"]
+    if hasattr(expires_at, 'replace') and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    
+    if expires_at < datetime.now(timezone.utc):
         # Clean up expired session
         await db.sessions.delete_one({"_id": session["_id"]})
         raise HTTPException(
