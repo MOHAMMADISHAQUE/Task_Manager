@@ -68,10 +68,7 @@ const Layout = ({ children }) => {
               <Button variant="ghost" size="sm">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
+              <UserMenu />
             </div>
           </div>
         </div>
