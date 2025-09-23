@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from typing import List
 import uuid
 from datetime import datetime
+from auth_routes import create_auth_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -53,6 +54,10 @@ async def create_status_check(input: StatusCheckCreate):
 async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
+
+# Create and include auth router
+auth_router = create_auth_router(db)
+api_router.include_router(auth_router)
 
 # Include the router in the main app
 app.include_router(api_router)
