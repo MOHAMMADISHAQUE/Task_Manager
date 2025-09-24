@@ -202,7 +202,7 @@ const Dashboard = () => {
               {upcomingTasks.length > 0 ? (
                 <div className="space-y-4">
                   {upcomingTasks.map((task) => {
-                    const dueDate = new Date(task.dueDate);
+                    const dueDate = new Date(task.due_date);
                     const today = new Date();
                     const diffTime = dueDate - today;
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
