@@ -40,6 +40,7 @@ def create_notifications_router(db: AsyncIOMotorDatabase) -> APIRouter:
         
         notifications = await db.notifications.find(
             query,
+            {"_id": 0},  # Exclude ObjectId field
             sort=[("created_at", -1)]
         ).limit(limit).to_list(length=limit)
         
