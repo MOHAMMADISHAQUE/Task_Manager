@@ -205,10 +205,19 @@ def create_settings_router(db: AsyncIOMotorDatabase) -> APIRouter:
         
         login_history = []
         for session in sessions:
+            # Handle timezone-aware datetime comparison
+            expires_at = session["expires_at"]
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            
+            created_at = session["created_at"]
+            if created_at.tzinfo is None:
+                created_at = created_at.replace(tzinfo=timezone.utc)
+            
             login_history.append({
-                "created_at": session["created_at"].isoformat(),
-                "expires_at": session["expires_at"].isoformat(),
-                "active": session["expires_at"] > datetime.now(timezone.utc)
+                "created_at": created_at.isoformat(),
+                "expires_at": expires_at.isoformat(),
+                "active": expires_at > datetime.now(timezone.utc)
             })
         
         return {
