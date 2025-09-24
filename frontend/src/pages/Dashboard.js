@@ -213,7 +213,7 @@ const Dashboard = () => {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completedTasks}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.completedTasks}</div>
             <div className="mt-2">
               <Progress value={stats.completionRate} className="h-2" />
             </div>
