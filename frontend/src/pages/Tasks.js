@@ -162,12 +162,12 @@ const Tasks = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-          <div className="flex items-center gap-2 text-blue-600 mb-1">
-            <Clock className="h-4 w-4" />
-            <span className="text-sm font-medium">Pending</span>
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 sm:p-4 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-1 sm:gap-2 text-blue-600 mb-1">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm font-medium">Pending</span>
           </div>
-          <div className="text-2xl font-bold text-blue-700">{pendingTasks.length}</div>
+          <div className="text-lg sm:text-2xl font-bold text-blue-700">{pendingTasks.length}</div>
         </div>
         
         <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 rounded-lg border border-yellow-200">
