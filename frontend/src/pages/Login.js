@@ -89,6 +89,26 @@ const Login = () => {
     setLoading(false);
   };
 
+  const handleEmergentLogin = async () => {
+    setEmergentLoading(true);
+    
+    try {
+      // Get the current URL as redirect URL
+      const currentUrl = window.location.origin + '/login';
+      
+      // Redirect to Emergent Auth
+      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(currentUrl)}`;
+      window.location.href = authUrl;
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "Failed to initiate Google login",
+        variant: "destructive",
+      });
+      setEmergentLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
