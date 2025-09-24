@@ -15,10 +15,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [emergentLoading, setEmergentLoading] = useState(false);
   
-  const { login, loginWithEmergent, isAuthenticated } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Redirect to dashboard if already authenticated
   if (isAuthenticated) {
