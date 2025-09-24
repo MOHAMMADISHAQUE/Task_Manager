@@ -115,15 +115,16 @@ const Layout = ({ children }) => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full border-r border-gray-200">
-          {/* Close button for mobile */}
-          <div className="flex justify-end p-4">
+          {/* Close button for mobile - compact header */}
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-900">Menu</h2>
             <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 pb-4 space-y-1">
+          <nav className="flex-1 px-4 py-2 space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
