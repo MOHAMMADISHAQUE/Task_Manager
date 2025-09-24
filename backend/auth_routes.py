@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import datetime, timezone
 from models.auth import (
     SignupRequest, LoginRequest, ForgotPasswordRequest, ResetPasswordRequest,
-    OAuthProcessRequest, UserResponse, AuthResponse, User, Session, PasswordResetToken
+    UserResponse, AuthResponse, User, Session, PasswordResetToken
 )
 from auth.utils import (
     verify_password, get_password_hash, generate_session_token, 
@@ -149,76 +149,6 @@ def create_auth_router(db: AsyncIOMotorDatabase) -> APIRouter:
             user=user_response,
             message="Login successful"
         )
-
-    @router.post("/process-oauth", response_model=AuthResponse)
-    async def process_oauth(oauth_data: OAuthProcessRequest, response: Response):
-        """Process OAuth login from Emergent Auth."""
-        
-        try:
-            user_data = oauth_data.user_data
-            
-            # Check if user exists
-            existing_user = await db.users.find_one({"email": user_data["email"]})
-            
-            if existing_user:
-                # User exists, update session
-                user_id = existing_user["id"]
-            else:
-                # Create new user
-                user = User(
-                    name=user_data["name"],
-                    email=user_data["email"],
-                    picture=user_data.get("picture"),
-                    auth_provider="google"
-                )
-                
-                await db.users.insert_one(user.dict())
-                user_id = user.id
-            
-            # Create session with the provided session token
-            hashed_session_token = hash_token(oauth_data.session_token)
-            
-            session = Session(
-                user_id=user_id,
-                session_token=hashed_session_token,
-                expires_at=get_session_expiry()
-            )
-            
-            await db.sessions.insert_one(session.dict())
-            
-            # Set secure cookie
-            response.set_cookie(
-                "session_token",
-                oauth_data.session_token,
-                max_age=7 * 24 * 60 * 60,  # 7 days
-                httponly=True,
-                secure=True,
-                samesite="none",
-                path="/"
-            )
-            
-            # Get updated user data
-            user = await db.users.find_one({"id": user_id})
-            
-            user_response = UserResponse(
-                id=user["id"],
-                name=user["name"],
-                email=user["email"],
-                picture=user.get("picture"),
-                auth_provider=user.get("auth_provider", "google")
-            )
-            
-            return AuthResponse(
-                user=user_response,
-                message="OAuth login successful"
-            )
-            
-        except Exception as e:
-            logger.error(f"OAuth processing error: {str(e)}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Failed to process OAuth login"
-            )
 
     @router.get("/me", response_model=UserResponse)
     async def get_current_user_info(request: Request):
