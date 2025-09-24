@@ -11,6 +11,8 @@ from typing import List
 import uuid
 from datetime import datetime
 from auth_routes import create_auth_router
+from routes.tasks import create_tasks_router
+from routes.projects import create_projects_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -41,7 +43,7 @@ class StatusCheckCreate(BaseModel):
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "SmartTask AI Backend"}
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
@@ -55,9 +57,14 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# Create and include auth router
+# Create and include routers
 auth_router = create_auth_router(db)
+tasks_router = create_tasks_router(db)
+projects_router = create_projects_router(db)
+
 api_router.include_router(auth_router)
+api_router.include_router(tasks_router)
+api_router.include_router(projects_router)
 
 # Include the router in the main app
 app.include_router(api_router)
