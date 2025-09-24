@@ -23,60 +23,6 @@ export const AuthProvider = ({ children }) => {
     checkExistingSession();
   }, []);
 
-  // Handle session_id from URL fragment after OAuth redirect
-  useEffect(() => {
-    const handleSessionId = async () => {
-      const hash = window.location.hash;
-      console.log('Checking URL hash:', hash);
-      
-      if (hash && hash.includes('session_id=')) {
-        console.log('Found session_id in URL hash, processing OAuth...');
-        setLoading(true);
-        const sessionId = hash.split('session_id=')[1].split('&')[0];
-        console.log('Extracted session ID:', sessionId);
-        
-        try {
-          console.log('Calling Emergent Auth API...');
-          // Process session with Emergent backend
-          const response = await axios.get('https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data', {
-            headers: {
-              'X-Session-ID': sessionId
-            }
-          });
-          
-          console.log('Emergent Auth response:', response.data);
-
-          console.log('Calling our backend OAuth process...');
-          // Send session data to our backend to create user session
-          const authResponse = await axios.post(`${API}/auth/process-oauth`, {
-            user_data: response.data,
-            session_token: response.data.session_token
-          }, {
-            withCredentials: true
-          });
-
-          console.log('Backend auth response:', authResponse.data);
-          setUser(authResponse.data.user);
-          
-          // Clean URL fragment
-          window.location.hash = '';
-          window.history.replaceState(null, null, window.location.pathname);
-          console.log('OAuth processing completed successfully');
-          
-        } catch (error) {
-          console.error('OAuth processing failed:', error);
-          console.error('Error details:', error.response?.data);
-          // Redirect to login on error
-          window.location.href = '/login';
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    handleSessionId();
-  }, []);
-
   const checkExistingSession = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, {
@@ -166,12 +112,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const initiateGoogleAuth = () => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-    window.location.href = authUrl;
-  };
-
   const value = {
     user,
     loading,
@@ -180,7 +120,6 @@ export const AuthProvider = ({ children }) => {
     logout,
     forgotPassword,
     resetPassword,
-    initiateGoogleAuth,
     isAuthenticated: !!user
   };
 
