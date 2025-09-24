@@ -397,6 +397,132 @@ backend:
           agent: "testing"
           comment: "✅ FIXED: Resolved datetime parsing issue in overdue task calculation by adding proper type checking for due_date fields (handles both string and datetime objects). AI task summary now works correctly: generates intelligent summary of user's task status with statistics (total, completed, pending, overdue, high_priority), provides motivational insights and actionable overview, uses GPT-5 for natural language generation with fallback to pattern-based summaries, requires authentication, handles users with no tasks appropriately."
 
+  - task: "Profile Settings (GET/PUT /api/settings/profile)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/settings.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Profile settings tested successfully: GET endpoint retrieves user profile data (name, email, role, timezone, language, auth_provider), PUT endpoint allows updating profile information, works with both email and emergent auth users, requires authentication (401 for unauthenticated requests), profile updates persist correctly."
+
+  - task: "Notification Settings (GET/PUT /api/settings/notifications)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/settings.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Notification settings tested successfully: GET endpoint retrieves user notification preferences with proper defaults (email, push, desktop, task_reminders, project_updates, weekly_digest), PUT endpoint allows updating notification settings, settings persist correctly, requires authentication, uses proper defaults for new users."
+
+  - task: "Change Password (POST /api/settings/change-password)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/settings.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Password change tested successfully: allows email auth users to change password, verifies current password before updating, correctly rejects wrong current password (400), password changes work and new password can be used for login, requires authentication."
+
+  - task: "Security Info (GET /api/settings/security)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/settings.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ Initial test failed with 500 error due to timezone-aware vs timezone-naive datetime comparison issue in login history"
+        - working: true
+          agent: "testing"
+          comment: "✅ FIXED: Resolved timezone comparison issue in login history processing. Security info endpoint now works correctly: returns user security information (auth_provider, two_factor_enabled, login_history), shows login history with session data (created_at, expires_at, active status), indicates auth provider type, requires authentication."
+
+  - task: "Get Notifications (GET /api/notifications/)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/notifications.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ Initial test failed with 500 error due to ObjectId serialization issue in notification documents"
+        - working: true
+          agent: "testing"
+          comment: "✅ FIXED: Resolved ObjectId serialization issue by excluding _id field from queries. Get notifications endpoint now works correctly: retrieves user notifications with pagination (limit parameter), supports unread_only filter, returns proper notification structure (id, user_id, title, message, type, read, created_at, action_url), requires authentication."
+
+  - task: "Unread Count (GET /api/notifications/unread-count)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/notifications.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Unread count tested successfully: returns accurate count of unread notifications, updates properly when notifications are marked as read, requires authentication, returns proper integer count."
+
+  - task: "Mark Read (PUT /api/notifications/mark-read)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/notifications.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Mark read tested successfully: marks specific notifications as read using notification_ids array, updates read status properly, returns success message with count, requires authentication, only affects user's own notifications."
+
+  - task: "Mark All Read (PUT /api/notifications/mark-all-read)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/notifications.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Mark all read tested successfully: marks all user notifications as read, returns proper count of marked notifications, updates unread count to 0, requires authentication, only affects user's own notifications."
+
+  - task: "Delete Notification (DELETE /api/notifications/{id})"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/notifications.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Delete notification tested successfully: deletes specific notifications by ID, only allows users to delete their own notifications, returns 404 for non-existent notifications, requires authentication, returns success message on deletion."
+
+  - task: "Test Notifications (POST /api/notifications/test)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/notifications.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Test notifications tested successfully: creates sample notifications for testing (3 diverse notification types: warning, success, info), generates proper notification structure with different types and timestamps, requires authentication, useful for development and testing."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
