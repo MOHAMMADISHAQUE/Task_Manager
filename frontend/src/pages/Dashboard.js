@@ -373,15 +373,15 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-6">
           {/* AI Suggestions Panel */}
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-600" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
                 AI Suggestions
                 <Badge variant="secondary" className="text-xs">Smart</Badge>
               </CardTitle>
-              <CardDescription>Personalized recommendations for better productivity</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Personalized recommendations for better productivity</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {loadingSuggestions ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
