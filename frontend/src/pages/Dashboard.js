@@ -16,6 +16,8 @@ import {
   Zap
 } from "lucide-react";
 import { useTask } from "../contexts/TaskContext";
+import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../hooks/use-toast";
 import TaskCard from "../components/TaskCard";
 import TaskForm from "../components/TaskForm";
 
