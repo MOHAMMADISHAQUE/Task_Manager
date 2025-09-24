@@ -261,6 +261,45 @@ backend:
           agent: "testing"
           comment: "✅ New user creation via Emergent Auth verified: system creates users with auth_provider='emergent', properly sets google_id field, initializes sample data for new users, maintains data consistency with existing user creation flow."
 
+  - task: "Natural Language Task Creation (POST /api/ai/parse-task)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/ai.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Natural language task parsing tested successfully: accepts various text inputs ('Remember to buy groceries', 'Call John tomorrow at 3 PM', 'Finish quarterly report next Friday with high priority'), extracts title/description/due_date/priority correctly, uses GPT-5 AI when available with fallback to mock parsing, creates and saves tasks to database, requires authentication (401 for unauthenticated requests), handles empty text gracefully."
+
+  - task: "AI Task Suggestions (GET /api/ai/suggestions)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/ai.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ AI task suggestions tested successfully: provides starter suggestions for users with no tasks (4 helpful suggestions), analyzes existing tasks and provides personalized recommendations for users with tasks, uses GPT-5 for smart analysis with fallback to pattern-based suggestions, requires authentication (401 for unauthenticated requests), returns proper JSON structure with suggestions array."
+
+  - task: "AI Task Summary (GET /api/ai/summary)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/ai.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ Initial test failed with 500 error due to datetime parsing issue in overdue task calculation"
+        - working: true
+          agent: "testing"
+          comment: "✅ FIXED: Resolved datetime parsing issue in overdue task calculation by adding proper type checking for due_date fields (handles both string and datetime objects). AI task summary now works correctly: generates intelligent summary of user's task status with statistics (total, completed, pending, overdue, high_priority), provides motivational insights and actionable overview, uses GPT-5 for natural language generation with fallback to pattern-based summaries, requires authentication, handles users with no tasks appropriately."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
