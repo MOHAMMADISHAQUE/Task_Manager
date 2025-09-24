@@ -22,6 +22,42 @@ const Signup = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Check for emergent auth callback
+  useEffect(() => {
+    const handleEmergentCallback = async () => {
+      const hash = window.location.hash;
+      const urlParams = new URLSearchParams(hash.substring(1));
+      const sessionId = urlParams.get('session_id');
+      
+      if (sessionId) {
+        setEmergentLoading(true);
+        const result = await loginWithEmergent(sessionId);
+        
+        if (result.success) {
+          toast({
+            title: "Welcome!",
+            description: "Your account has been created and you are now logged in.",
+          });
+          
+          // Clean the URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          // Redirect to dashboard
+          navigate('/dashboard', { replace: true });
+        } else {
+          toast({
+            title: "Signup Failed",
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+        setEmergentLoading(false);
+      }
+    };
+
+    handleEmergentCallback();
+  }, [loginWithEmergent, toast, navigate]);
+
   // Redirect if already authenticated
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
