@@ -144,6 +144,27 @@ const Signup = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Emergent Auth Button */}
+            <Button
+              type="button"
+              onClick={handleEmergentSignup}
+              disabled={emergentLoading || loading}
+              className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-2"
+            >
+              <Chrome className="h-4 w-4" />
+              {emergentLoading ? 'Connecting...' : 'Continue with Google'}
+            </Button>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">Or create with email</span>
+              </div>
+            </div>
+
             {/* Signup Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
