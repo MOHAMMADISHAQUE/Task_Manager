@@ -206,7 +206,7 @@ const Tasks = () => {
           <p className="text-sm text-gray-600 mb-4">
             Type naturally: "Call John tomorrow at 3 PM" or "Finish report next Friday"
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Input
               placeholder="Remind me to..."
               value={naturalLanguageText}
@@ -218,13 +218,14 @@ const Tasks = () => {
             <Button 
               onClick={handleNaturalLanguageTask}
               disabled={!naturalLanguageText.trim() || isCreatingTask}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
             >
               {isCreatingTask ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               ) : (
-                <Send className="h-4 w-4" />
+                <Send className="h-4 w-4 mr-2 sm:mr-0" />
               )}
+              <span className="sm:hidden">Create Task</span>
             </Button>
           </div>
         </CardContent>
