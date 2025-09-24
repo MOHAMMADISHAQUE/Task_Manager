@@ -339,8 +339,8 @@ const Settings = () => {
                   <div className="text-xs text-gray-500">Get reminded about upcoming task deadlines</div>
                 </div>
                 <Switch
-                  checked={notifications.taskReminders}
-                  onCheckedChange={(value) => handleNotificationChange('taskReminders', value)}
+                  checked={notifications.task_reminders}
+                  onCheckedChange={(value) => handleNotificationChange('task_reminders', value)}
                 />
               </div>
               
