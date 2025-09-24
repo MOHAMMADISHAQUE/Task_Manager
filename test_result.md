@@ -531,14 +531,16 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Mobile Navigation - Hamburger Menu"
-    - "Mobile Sidebar Navigation"
-    - "Dashboard Mobile Layout - Stats Cards"
-    - "Dashboard Mobile Layout - AI Features"
-    - "Tasks Page Mobile Layout - Smart Input Box"
-    - "Tasks Page Mobile Layout - Task Stats Grid"
-    - "Login Page Mobile Responsiveness"
-    - "Content Reflow at Different Viewport Sizes"
+    - "Profile Settings (GET/PUT /api/settings/profile)"
+    - "Notification Settings (GET/PUT /api/settings/notifications)"
+    - "Change Password (POST /api/settings/change-password)"
+    - "Security Info (GET /api/settings/security)"
+    - "Get Notifications (GET /api/notifications/)"
+    - "Unread Count (GET /api/notifications/unread-count)"
+    - "Mark Read (PUT /api/notifications/mark-read)"
+    - "Mark All Read (PUT /api/notifications/mark-all-read)"
+    - "Delete Notification (DELETE /api/notifications/{id})"
+    - "Test Notifications (POST /api/notifications/test)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
