@@ -4,7 +4,8 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Checkbox } from "../components/ui/checkbox";
+import { Dialog, DialogContent, DialogTrigger } from "../components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { 
   Plus, 
   Search, 
@@ -12,16 +13,24 @@ import {
   Calendar,
   Clock,
   User,
-  MoreHorizontal
+  MoreHorizontal,
+  CheckSquare,
+  AlertCircle,
+  Flag
 } from "lucide-react";
-import { mockData } from "../data/mock";
+import { useTask } from "../contexts/TaskContext";
+import TaskCard from "../components/TaskCard";
+import TaskForm from "../components/TaskForm";
 
 const Tasks = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [viewMode, setViewMode] = useState("all");
   
-  const { tasks } = mockData;
+  const { tasks, getTasksByStatus } = useTask();
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,23 +41,50 @@ const Tasks = () => {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in-progress': return 'bg-blue-100 text-blue-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const pendingTasks = getTasksByStatus('pending');
+  const inProgressTasks = getTasksByStatus('in-progress');
+  const completedTasks = getTasksByStatus('completed');
+  const overdueTasks = tasks.filter(task => {
+    if (task.status === 'completed' || !task.dueDate) return false;
+    return new Date(task.dueDate) < new Date();
+  });
+
+  const handleTaskFormSuccess = () => {
+    setShowTaskForm(false);
+    setEditingTask(null);
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+    setShowTaskForm(true);
   };
+
+  const handleCloseTaskForm = () => {
+    setShowTaskForm(false);
+    setEditingTask(null);
+  };
+
+  const TaskList = ({ tasks: taskList, emptyMessage }) => (
+    <div className="space-y-4">
+      {taskList.length > 0 ? (
+        taskList.map((task) => (
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            onEdit={handleEditTask}
+          />
+        ))
+      ) : (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <CheckSquare className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+            <p className="text-gray-600">{emptyMessage}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -58,10 +94,57 @@ const Tasks = () => {
           <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
           <p className="text-gray-600 mt-1">Manage and track all your tasks in one place.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Task
-        </Button>
+        
+        <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700 transition-colors">
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Task
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <TaskForm 
+              task={editingTask}
+              onSuccess={handleTaskFormSuccess}
+              onCancel={handleCloseTaskForm}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-2 text-blue-600 mb-1">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm font-medium">Pending</span>
+          </div>
+          <div className="text-2xl font-bold text-blue-700">{pendingTasks.length}</div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 rounded-lg border border-yellow-200">
+          <div className="flex items-center gap-2 text-yellow-600 mb-1">
+            <Flag className="h-4 w-4" />
+            <span className="text-sm font-medium">In Progress</span>
+          </div>
+          <div className="text-2xl font-bold text-yellow-700">{inProgressTasks.length}</div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+          <div className="flex items-center gap-2 text-green-600 mb-1">
+            <CheckSquare className="h-4 w-4" />
+            <span className="text-sm font-medium">Completed</span>
+          </div>
+          <div className="text-2xl font-bold text-green-700">{completedTasks.length}</div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
+          <div className="flex items-center gap-2 text-red-600 mb-1">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Overdue</span>
+          </div>
+          <div className="text-2xl font-bold text-red-700">{overdueTasks.length}</div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -105,95 +188,115 @@ const Tasks = () => {
               </SelectContent>
             </Select>
 
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+                setPriorityFilter("all");
+              }}
+            >
               <Filter className="mr-2 h-4 w-4" />
-              More Filters
+              Clear
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Task List */}
-      <div className="space-y-4">
-        {filteredTasks.map((task) => (
-          <Card key={task.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4 flex-1">
-                  <Checkbox 
-                    checked={task.status === 'completed'}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className={`font-semibold text-lg ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                        {task.title}
-                      </h3>
-                      <Badge className={`text-xs ${getStatusColor(task.status)}`}>
-                        {task.status}
-                      </Badge>
-                      <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
-                      </Badge>
-                    </div>
-                    
-                    <p className="text-gray-600 mb-3">{task.description}</p>
-                    
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>Due: {task.dueDate}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <User className="h-4 w-4" />
-                        <span>{task.assignee}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{task.estimatedTime}</span>
-                      </div>
-                    </div>
-                    
-                    {task.tags && task.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {task.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Task Tabs */}
+      <Tabs value={viewMode} onValueChange={setViewMode} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="all">All Tasks</TabsTrigger>
+          <TabsTrigger value="pending">Pending</TabsTrigger>
+          <TabsTrigger value="in-progress">In Progress</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="overdue">Overdue</TabsTrigger>
+        </TabsList>
 
-      {filteredTasks.length === 0 && (
+        <TabsContent value="all">
+          <TaskList 
+            tasks={filteredTasks} 
+            emptyMessage={searchTerm || statusFilter !== "all" || priorityFilter !== "all" 
+              ? "Try adjusting your filters or search terms."
+              : "Get started by creating your first task."
+            }
+          />
+        </TabsContent>
+
+        <TabsContent value="pending">
+          <TaskList 
+            tasks={pendingTasks.filter(task => {
+              const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                   task.description.toLowerCase().includes(searchTerm.toLowerCase());
+              const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+              return matchesSearch && matchesPriority;
+            })} 
+            emptyMessage="No pending tasks. Great job staying on top of things!"
+          />
+        </TabsContent>
+
+        <TabsContent value="in-progress">
+          <TaskList 
+            tasks={inProgressTasks.filter(task => {
+              const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                   task.description.toLowerCase().includes(searchTerm.toLowerCase());
+              const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+              return matchesSearch && matchesPriority;
+            })} 
+            emptyMessage="No tasks in progress. Start working on a pending task!"
+          />
+        </TabsContent>
+
+        <TabsContent value="completed">
+          <TaskList 
+            tasks={completedTasks.filter(task => {
+              const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                   task.description.toLowerCase().includes(searchTerm.toLowerCase());
+              const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+              return matchesSearch && matchesPriority;
+            })} 
+            emptyMessage="No completed tasks yet. Complete some tasks to see them here!"
+          />
+        </TabsContent>
+
+        <TabsContent value="overdue">
+          <TaskList 
+            tasks={overdueTasks.filter(task => {
+              const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                   task.description.toLowerCase().includes(searchTerm.toLowerCase());
+              const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
+              return matchesSearch && matchesPriority;
+            })} 
+            emptyMessage="No overdue tasks. Excellent time management!"
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Empty State for no tasks at all */}
+      {tasks.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
             <div className="text-gray-400 mb-4">
-              <CheckSquare className="h-12 w-12 mx-auto" />
+              <CheckSquare className="h-16 w-16 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
-            <p className="text-gray-600">
-              {searchTerm || statusFilter !== "all" || priorityFilter !== "all" 
-                ? "Try adjusting your filters or search terms."
-                : "Get started by creating your first task."
-              }
+            <h3 className="text-xl font-medium text-gray-900 mb-2">No tasks yet</h3>
+            <p className="text-gray-600 mb-6">
+              Get started by creating your first task. Stay organized and boost your productivity!
             </p>
-            {(!searchTerm && statusFilter === "all" && priorityFilter === "all") && (
-              <Button className="mt-4 bg-blue-600 hover:bg-blue-700">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Your First Task
-              </Button>
-            )}
+            <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Your First Task
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <TaskForm 
+                  onSuccess={handleTaskFormSuccess}
+                  onCancel={handleCloseTaskForm}
+                />
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       )}
