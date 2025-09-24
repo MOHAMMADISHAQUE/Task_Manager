@@ -8,7 +8,7 @@ class User(BaseModel):
     name: str
     email: EmailStr
     picture: Optional[str] = None
-    auth_provider: str = "email"  # "email" or "google"
+    auth_provider: str = "email"  # Only "email" now
     password_hash: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -45,10 +45,6 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     password: str
-
-class OAuthProcessRequest(BaseModel):
-    user_data: dict
-    session_token: str
 
 class UserResponse(BaseModel):
     id: str
