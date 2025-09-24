@@ -13,7 +13,9 @@ import {
   Calendar,
   AlertCircle,
   Target,
-  Zap
+  Zap,
+  Sparkles,
+  RefreshCw
 } from "lucide-react";
 import { useTask } from "../contexts/TaskContext";
 import { useAuth } from "../contexts/AuthContext";
