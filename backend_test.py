@@ -922,6 +922,663 @@ class AuthTestSuite:
         except Exception as e:
             self.log_test("ai_parse_task_invalid_input", False, f"Exception: {str(e)}")
 
+    # ========== SETTINGS API TESTS ==========
+    
+    def test_get_profile_settings(self):
+        """Test getting user profile settings"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("get_profile_settings", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.get(f"{BASE_URL}/settings/profile")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "profile" in data:
+                    profile = data["profile"]
+                    required_fields = ["name", "email", "auth_provider", "role", "timezone", "language"]
+                    missing_fields = [field for field in required_fields if field not in profile]
+                    
+                    if not missing_fields:
+                        self.log_test("get_profile_settings", True, f"Profile retrieved successfully: {profile['email']}")
+                    else:
+                        self.log_test("get_profile_settings", False, f"Missing profile fields: {missing_fields}")
+                else:
+                    self.log_test("get_profile_settings", False, "Missing profile in response", data)
+            else:
+                self.log_test("get_profile_settings", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("get_profile_settings", False, f"Exception: {str(e)}")
+    
+    def test_update_profile_settings(self):
+        """Test updating user profile settings"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("update_profile_settings", False, "Failed to login for test setup")
+                return
+            
+            # Update profile
+            update_payload = {
+                "name": "Updated Test User",
+                "role": "Senior Developer",
+                "timezone": "UTC-5",
+                "language": "Spanish"
+            }
+            
+            response = self.session.put(f"{BASE_URL}/settings/profile", json=update_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    # Verify the update by getting profile again
+                    get_response = self.session.get(f"{BASE_URL}/settings/profile")
+                    if get_response.status_code == 200:
+                        profile_data = get_response.json()
+                        profile = profile_data.get("profile", {})
+                        if (profile.get("name") == "Updated Test User" and 
+                            profile.get("role") == "Senior Developer"):
+                            self.log_test("update_profile_settings", True, "Profile updated successfully")
+                        else:
+                            self.log_test("update_profile_settings", False, "Profile not updated correctly", profile)
+                    else:
+                        self.log_test("update_profile_settings", False, "Failed to verify profile update")
+                else:
+                    self.log_test("update_profile_settings", False, "Update not successful", data)
+            else:
+                self.log_test("update_profile_settings", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("update_profile_settings", False, f"Exception: {str(e)}")
+    
+    def test_get_notification_settings(self):
+        """Test getting notification settings"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("get_notification_settings", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.get(f"{BASE_URL}/settings/notifications")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "notifications" in data:
+                    notifications = data["notifications"]
+                    required_fields = ["email", "push", "desktop", "task_reminders", "project_updates", "weekly_digest"]
+                    missing_fields = [field for field in required_fields if field not in notifications]
+                    
+                    if not missing_fields:
+                        self.log_test("get_notification_settings", True, f"Notification settings retrieved: {notifications}")
+                    else:
+                        self.log_test("get_notification_settings", False, f"Missing notification fields: {missing_fields}")
+                else:
+                    self.log_test("get_notification_settings", False, "Missing notifications in response", data)
+            else:
+                self.log_test("get_notification_settings", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("get_notification_settings", False, f"Exception: {str(e)}")
+    
+    def test_update_notification_settings(self):
+        """Test updating notification settings"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("update_notification_settings", False, "Failed to login for test setup")
+                return
+            
+            # Update notification settings
+            update_payload = {
+                "email": False,
+                "push": True,
+                "desktop": True,
+                "task_reminders": False,
+                "project_updates": True,
+                "weekly_digest": True
+            }
+            
+            response = self.session.put(f"{BASE_URL}/settings/notifications", json=update_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    # Verify the update by getting settings again
+                    get_response = self.session.get(f"{BASE_URL}/settings/notifications")
+                    if get_response.status_code == 200:
+                        settings_data = get_response.json()
+                        notifications = settings_data.get("notifications", {})
+                        if (notifications.get("email") == False and 
+                            notifications.get("desktop") == True and
+                            notifications.get("weekly_digest") == True):
+                            self.log_test("update_notification_settings", True, "Notification settings updated successfully")
+                        else:
+                            self.log_test("update_notification_settings", False, "Settings not updated correctly", notifications)
+                    else:
+                        self.log_test("update_notification_settings", False, "Failed to verify settings update")
+                else:
+                    self.log_test("update_notification_settings", False, "Update not successful", data)
+            else:
+                self.log_test("update_notification_settings", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("update_notification_settings", False, f"Exception: {str(e)}")
+    
+    def test_change_password_email_user(self):
+        """Test password change for email auth users"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("change_password_email_user", False, "Failed to login for test setup")
+                return
+            
+            # Try to change password
+            change_payload = {
+                "current_password": TEST_USER_PASSWORD,
+                "new_password": "newsecurepassword123"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/settings/change-password", json=change_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    # Test login with new password
+                    self.session.cookies.clear()
+                    new_login_payload = {
+                        "email": TEST_USER_EMAIL,
+                        "password": "newsecurepassword123"
+                    }
+                    
+                    new_login_response = self.session.post(f"{BASE_URL}/auth/login", json=new_login_payload)
+                    
+                    if new_login_response.status_code == 200:
+                        self.log_test("change_password_email_user", True, "Password changed successfully")
+                        # Change back to original password for other tests
+                        change_back_payload = {
+                            "current_password": "newsecurepassword123",
+                            "new_password": TEST_USER_PASSWORD
+                        }
+                        self.session.post(f"{BASE_URL}/settings/change-password", json=change_back_payload)
+                    else:
+                        self.log_test("change_password_email_user", False, "New password login failed")
+                else:
+                    self.log_test("change_password_email_user", False, "Password change not successful", data)
+            else:
+                self.log_test("change_password_email_user", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("change_password_email_user", False, f"Exception: {str(e)}")
+    
+    def test_change_password_wrong_current(self):
+        """Test password change with wrong current password"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("change_password_wrong_current", False, "Failed to login for test setup")
+                return
+            
+            # Try to change password with wrong current password
+            change_payload = {
+                "current_password": "wrongpassword",
+                "new_password": "newsecurepassword123"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/settings/change-password", json=change_payload)
+            
+            if response.status_code == 400:
+                data = response.json()
+                if "incorrect" in data.get("detail", "").lower():
+                    self.log_test("change_password_wrong_current", True, "Correctly rejected wrong current password")
+                else:
+                    self.log_test("change_password_wrong_current", False, "Wrong error message", data)
+            else:
+                self.log_test("change_password_wrong_current", False, f"Expected 400, got {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("change_password_wrong_current", False, f"Exception: {str(e)}")
+    
+    def test_get_security_info(self):
+        """Test getting security information"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("get_security_info", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.get(f"{BASE_URL}/settings/security")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["auth_provider", "two_factor_enabled", "login_history"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    if data.get("auth_provider") == "email":
+                        self.log_test("get_security_info", True, f"Security info retrieved: {len(data.get('login_history', []))} login sessions")
+                    else:
+                        self.log_test("get_security_info", False, f"Wrong auth_provider: {data.get('auth_provider')}")
+                else:
+                    self.log_test("get_security_info", False, f"Missing security fields: {missing_fields}")
+            else:
+                self.log_test("get_security_info", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("get_security_info", False, f"Exception: {str(e)}")
+    
+    def test_settings_without_auth(self):
+        """Test settings endpoints without authentication"""
+        try:
+            # Clear session
+            self.session.cookies.clear()
+            
+            endpoints = [
+                "/settings/profile",
+                "/settings/notifications", 
+                "/settings/security"
+            ]
+            
+            all_protected = True
+            for endpoint in endpoints:
+                response = self.session.get(f"{BASE_URL}{endpoint}")
+                if response.status_code != 401:
+                    all_protected = False
+                    break
+            
+            if all_protected:
+                self.log_test("settings_without_auth", True, "All settings endpoints properly protected")
+            else:
+                self.log_test("settings_without_auth", False, f"Some endpoints not protected: {endpoint}")
+                
+        except Exception as e:
+            self.log_test("settings_without_auth", False, f"Exception: {str(e)}")
+
+    # ========== NOTIFICATIONS API TESTS ==========
+    
+    def test_create_test_notifications(self):
+        """Test creating test notifications"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("create_test_notifications", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.post(f"{BASE_URL}/notifications/test")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_test("create_test_notifications", True, f"Test notifications created: {data.get('message')}")
+                else:
+                    self.log_test("create_test_notifications", False, "Creation not successful", data)
+            else:
+                self.log_test("create_test_notifications", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("create_test_notifications", False, f"Exception: {str(e)}")
+    
+    def test_get_notifications(self):
+        """Test getting user notifications"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("get_notifications", False, "Failed to login for test setup")
+                return
+            
+            # Create test notifications first
+            self.session.post(f"{BASE_URL}/notifications/test")
+            
+            response = self.session.get(f"{BASE_URL}/notifications/")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "notifications" in data:
+                    notifications = data["notifications"]
+                    if len(notifications) > 0:
+                        # Check notification structure
+                        first_notification = notifications[0]
+                        required_fields = ["id", "user_id", "title", "message", "type", "read", "created_at"]
+                        missing_fields = [field for field in required_fields if field not in first_notification]
+                        
+                        if not missing_fields:
+                            self.log_test("get_notifications", True, f"Retrieved {len(notifications)} notifications")
+                        else:
+                            self.log_test("get_notifications", False, f"Missing notification fields: {missing_fields}")
+                    else:
+                        self.log_test("get_notifications", True, "No notifications found (empty list)")
+                else:
+                    self.log_test("get_notifications", False, "Missing notifications in response", data)
+            else:
+                self.log_test("get_notifications", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("get_notifications", False, f"Exception: {str(e)}")
+    
+    def test_get_notifications_unread_only(self):
+        """Test getting only unread notifications"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("get_notifications_unread_only", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.get(f"{BASE_URL}/notifications/?unread_only=true")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "notifications" in data:
+                    notifications = data["notifications"]
+                    # Check that all notifications are unread
+                    all_unread = all(not notif.get("read", True) for notif in notifications)
+                    if all_unread:
+                        self.log_test("get_notifications_unread_only", True, f"Retrieved {len(notifications)} unread notifications")
+                    else:
+                        self.log_test("get_notifications_unread_only", False, "Some notifications were read")
+                else:
+                    self.log_test("get_notifications_unread_only", False, "Missing notifications in response", data)
+            else:
+                self.log_test("get_notifications_unread_only", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("get_notifications_unread_only", False, f"Exception: {str(e)}")
+    
+    def test_get_unread_count(self):
+        """Test getting unread notifications count"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("get_unread_count", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.get(f"{BASE_URL}/notifications/unread-count")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "unread_count" in data and isinstance(data["unread_count"], int):
+                    self.log_test("get_unread_count", True, f"Unread count: {data['unread_count']}")
+                else:
+                    self.log_test("get_unread_count", False, "Invalid unread_count format", data)
+            else:
+                self.log_test("get_unread_count", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("get_unread_count", False, f"Exception: {str(e)}")
+    
+    def test_mark_notifications_read(self):
+        """Test marking specific notifications as read"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("mark_notifications_read", False, "Failed to login for test setup")
+                return
+            
+            # Get notifications to find IDs
+            get_response = self.session.get(f"{BASE_URL}/notifications/")
+            
+            if get_response.status_code != 200:
+                self.log_test("mark_notifications_read", False, "Failed to get notifications for test setup")
+                return
+            
+            notifications = get_response.json().get("notifications", [])
+            if len(notifications) == 0:
+                self.log_test("mark_notifications_read", True, "No notifications to mark as read")
+                return
+            
+            # Mark first notification as read
+            notification_ids = [notifications[0]["id"]]
+            mark_payload = {
+                "notification_ids": notification_ids
+            }
+            
+            response = self.session.put(f"{BASE_URL}/notifications/mark-read", json=mark_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_test("mark_notifications_read", True, f"Marked notifications as read: {data.get('message')}")
+                else:
+                    self.log_test("mark_notifications_read", False, "Mark read not successful", data)
+            else:
+                self.log_test("mark_notifications_read", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("mark_notifications_read", False, f"Exception: {str(e)}")
+    
+    def test_mark_all_notifications_read(self):
+        """Test marking all notifications as read"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("mark_all_notifications_read", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.put(f"{BASE_URL}/notifications/mark-all-read")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    # Verify by checking unread count
+                    count_response = self.session.get(f"{BASE_URL}/notifications/unread-count")
+                    if count_response.status_code == 200:
+                        count_data = count_response.json()
+                        if count_data.get("unread_count") == 0:
+                            self.log_test("mark_all_notifications_read", True, f"All notifications marked as read: {data.get('message')}")
+                        else:
+                            self.log_test("mark_all_notifications_read", False, f"Still have unread: {count_data.get('unread_count')}")
+                    else:
+                        self.log_test("mark_all_notifications_read", True, f"Marked all as read: {data.get('message')}")
+                else:
+                    self.log_test("mark_all_notifications_read", False, "Mark all read not successful", data)
+            else:
+                self.log_test("mark_all_notifications_read", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("mark_all_notifications_read", False, f"Exception: {str(e)}")
+    
+    def test_delete_notification(self):
+        """Test deleting a specific notification"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("delete_notification", False, "Failed to login for test setup")
+                return
+            
+            # Create test notifications first
+            self.session.post(f"{BASE_URL}/notifications/test")
+            
+            # Get notifications to find an ID to delete
+            get_response = self.session.get(f"{BASE_URL}/notifications/")
+            
+            if get_response.status_code != 200:
+                self.log_test("delete_notification", False, "Failed to get notifications for test setup")
+                return
+            
+            notifications = get_response.json().get("notifications", [])
+            if len(notifications) == 0:
+                self.log_test("delete_notification", True, "No notifications to delete")
+                return
+            
+            # Delete first notification
+            notification_id = notifications[0]["id"]
+            response = self.session.delete(f"{BASE_URL}/notifications/{notification_id}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_test("delete_notification", True, "Notification deleted successfully")
+                else:
+                    self.log_test("delete_notification", False, "Delete not successful", data)
+            else:
+                self.log_test("delete_notification", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("delete_notification", False, f"Exception: {str(e)}")
+    
+    def test_delete_nonexistent_notification(self):
+        """Test deleting a non-existent notification"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("delete_nonexistent_notification", False, "Failed to login for test setup")
+                return
+            
+            # Try to delete non-existent notification
+            fake_id = str(uuid.uuid4())
+            response = self.session.delete(f"{BASE_URL}/notifications/{fake_id}")
+            
+            if response.status_code == 404:
+                data = response.json()
+                if "not found" in data.get("detail", "").lower():
+                    self.log_test("delete_nonexistent_notification", True, "Correctly rejected non-existent notification")
+                else:
+                    self.log_test("delete_nonexistent_notification", False, "Wrong error message", data)
+            else:
+                self.log_test("delete_nonexistent_notification", False, f"Expected 404, got {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("delete_nonexistent_notification", False, f"Exception: {str(e)}")
+    
+    def test_notifications_without_auth(self):
+        """Test notifications endpoints without authentication"""
+        try:
+            # Clear session
+            self.session.cookies.clear()
+            
+            endpoints = [
+                ("/notifications/", "GET"),
+                ("/notifications/unread-count", "GET"),
+                ("/notifications/test", "POST")
+            ]
+            
+            all_protected = True
+            failed_endpoint = None
+            for endpoint, method in endpoints:
+                if method == "GET":
+                    response = self.session.get(f"{BASE_URL}{endpoint}")
+                else:
+                    response = self.session.post(f"{BASE_URL}{endpoint}")
+                
+                if response.status_code != 401:
+                    all_protected = False
+                    failed_endpoint = endpoint
+                    break
+            
+            if all_protected:
+                self.log_test("notifications_without_auth", True, "All notification endpoints properly protected")
+            else:
+                self.log_test("notifications_without_auth", False, f"Endpoint not protected: {failed_endpoint}")
+                
+        except Exception as e:
+            self.log_test("notifications_without_auth", False, f"Exception: {str(e)}")
+
     def run_all_tests(self):
         """Run all authentication and AI tests"""
         print(f"🚀 Starting SmartTask AI Test Suite (Auth + AI Features)")
