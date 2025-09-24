@@ -13,6 +13,7 @@ from datetime import datetime
 from auth_routes import create_auth_router
 from routes.tasks import create_tasks_router
 from routes.projects import create_projects_router
+from routes.emergent_auth import create_emergent_auth_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
