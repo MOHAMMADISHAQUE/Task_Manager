@@ -112,6 +112,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithEmergent = async (sessionId) => {
+    try {
+      const response = await axios.post(`${API}/auth/emergent/callback`, {
+        session_id: sessionId
+      }, {
+        withCredentials: true
+      });
+      
+      setUser(response.data.user);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        message: error.response?.data?.detail || error.response?.data?.message || 'Emergent login failed' 
+      };
+    }
+  };
+
   const value = {
     user,
     loading,
