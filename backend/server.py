@@ -15,6 +15,8 @@ from routes.tasks import create_tasks_router
 from routes.projects import create_projects_router
 from routes.emergent_auth import create_emergent_auth_router
 from routes.ai import create_ai_router
+from routes.settings import create_settings_router
+from routes.notifications import create_notifications_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
