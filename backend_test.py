@@ -611,8 +611,16 @@ class AuthTestSuite:
         self.test_reset_password_invalid_token()
         self.test_reset_password_weak_password()
         
-        # OAuth endpoint
-        self.test_oauth_process_endpoint()
+        # Emergent Auth endpoints
+        self.test_emergent_auth_login_initiation()
+        self.test_emergent_auth_login_with_redirect()
+        self.test_emergent_auth_callback_invalid_session()
+        self.test_emergent_auth_callback_structure()
+        
+        # Dual authentication system tests
+        self.test_dual_auth_system_independence()
+        self.test_user_model_updates()
+        self.test_session_management_consistency()
         
         # Summary
         self.print_summary()
