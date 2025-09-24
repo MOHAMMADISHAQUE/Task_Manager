@@ -404,7 +404,15 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Mobile Navigation - Hamburger Menu"
+    - "Mobile Sidebar Navigation"
+    - "Dashboard Mobile Layout - Stats Cards"
+    - "Dashboard Mobile Layout - AI Features"
+    - "Tasks Page Mobile Layout - Smart Input Box"
+    - "Tasks Page Mobile Layout - Task Stats Grid"
+    - "Login Page Mobile Responsiveness"
+    - "Content Reflow at Different Viewport Sizes"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
