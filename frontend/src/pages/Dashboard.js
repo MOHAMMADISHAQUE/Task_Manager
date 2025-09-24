@@ -27,8 +27,8 @@ const Dashboard = () => {
   const stats = getTaskStats();
   const recentTasks = tasks.slice(0, 6);
   const upcomingTasks = tasks
-    .filter(task => task.dueDate && task.status !== 'completed')
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+    .filter(task => task.due_date && task.status !== 'completed')
+    .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
     .slice(0, 5);
 
   const handleTaskFormSuccess = (task) => {
