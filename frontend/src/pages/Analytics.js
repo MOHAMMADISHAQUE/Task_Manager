@@ -11,18 +11,16 @@ import {
   BarChart3,
   PieChart,
   Target,
-  Zap
+  Zap,
+  AlertCircle
 } from "lucide-react";
-import { mockData } from "../data/mock";
+import { useTask } from "../contexts/TaskContext";
 
 const Analytics = () => {
-  const { stats, tasks, projects } = mockData;
+  const { tasks, getTaskStats } = useTask();
+  const stats = getTaskStats();
 
   // Calculate analytics data
-  const completionRate = Math.round((stats.completedTasks / stats.totalTasks) * 100);
-  const overdueRate = Math.round((stats.overdueTasks / stats.totalTasks) * 100);
-  const activeProjectsRate = Math.round((stats.activeProjects / stats.totalProjects) * 100);
-
   const tasksByPriority = {
     high: tasks.filter(t => t.priority === 'high').length,
     medium: tasks.filter(t => t.priority === 'medium').length,
@@ -35,77 +33,101 @@ const Analytics = () => {
     pending: tasks.filter(t => t.status === 'pending').length,
   };
 
+  // Calculate productivity trends
+  const today = new Date();
+  const thisWeek = tasks.filter(task => {
+    const taskDate = new Date(task.createdAt);
+    const diffTime = today - taskDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 7;
+  });
+
+  const completedThisWeek = thisWeek.filter(t => t.status === 'completed').length;
+  const weeklyCompletionRate = thisWeek.length > 0 ? Math.round((completedThisWeek / thisWeek.length) * 100) : 0;
+
+  // Overdue tasks analysis
+  const overdueTasks = tasks.filter(task => {
+    if (task.status === 'completed' || !task.dueDate) return false;
+    return new Date(task.dueDate) < today;
+  });
+
+  // Upcoming deadlines
+  const upcomingDeadlines = tasks.filter(task => {
+    if (task.status === 'completed' || !task.dueDate) return false;
+    const dueDate = new Date(task.dueDate);
+    const diffTime = dueDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 7 && diffDays >= 0;
+  });
+
+  const getPercentage = (count, total) => {
+    return total > 0 ? Math.round((count / total) * 100) : 0;
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-        <p className="text-gray-600 mt-1">Get insights into your productivity and project performance.</p>
+        <p className="text-gray-600 mt-1">Get insights into your productivity and task performance.</p>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Task Completion Rate</CardTitle>
             <Target className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{completionRate}%</div>
+            <div className="text-2xl font-bold text-green-600">{stats.completionRate}%</div>
             <div className="mt-2">
-              <Progress value={completionRate} className="h-2" />
+              <Progress value={stats.completionRate} className="h-2" />
             </div>
             <p className="text-xs text-gray-600 mt-2">
-              <TrendingUp className="inline h-3 w-3 text-green-600 mr-1" />
-              +12% from last month
+              {stats.completedTasks} of {stats.totalTasks} tasks completed
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Daily Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">Weekly Progress</CardTitle>
             <Zap className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">6.4</div>
-            <p className="text-xs text-gray-600 mt-1">
-              <TrendingUp className="inline h-3 w-3 text-green-600 mr-1" />
-              +0.8 from last week
+            <div className="text-2xl font-bold text-blue-600">{weeklyCompletionRate}%</div>
+            <div className="mt-2">
+              <Progress value={weeklyCompletionRate} className="h-2" />
+            </div>
+            <p className="text-xs text-gray-600 mt-2">
+              {completedThisWeek} tasks completed this week
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Project Success Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Tasks</CardTitle>
             <BarChart3 className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{activeProjectsRate}%</div>
-            <div className="mt-2">
-              <Progress value={activeProjectsRate} className="h-2" />
-            </div>
-            <p className="text-xs text-gray-600 mt-2">
-              <TrendingUp className="inline h-3 w-3 text-green-600 mr-1" />
-              +5% from last quarter
+            <div className="text-2xl font-bold text-purple-600">{stats.pendingTasks + stats.inProgressTasks}</div>
+            <p className="text-xs text-gray-600 mt-1">
+              {stats.pendingTasks} pending, {stats.inProgressTasks} in progress
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue Rate</CardTitle>
-            <Clock className="h-4 w-4 text-red-600" />
+            <CardTitle className="text-sm font-medium">Overdue Tasks</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{overdueRate}%</div>
-            <div className="mt-2">
-              <Progress value={overdueRate} className="h-2 bg-red-100" />
-            </div>
-            <p className="text-xs text-gray-600 mt-2">
-              <TrendingDown className="inline h-3 w-3 text-red-600 mr-1" />
-              -2% from last month
+            <div className="text-2xl font-bold text-red-600">{stats.overdueTasks}</div>
+            <p className="text-xs text-gray-600 mt-1">
+              {stats.overdueTasks > 0 ? 'Need immediate attention' : 'All tasks on track!'}
             </p>
           </CardContent>
         </Card>
@@ -123,46 +145,53 @@ const Analytics = () => {
             <CardDescription>Breakdown of tasks by current status</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Completed</span>
+            {stats.totalTasks > 0 ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Completed</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">{tasksByStatus.completed}</div>
+                    <div className="text-xs text-gray-500">
+                      {getPercentage(tasksByStatus.completed, tasks.length)}%
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-medium">{tasksByStatus.completed}</div>
-                  <div className="text-xs text-gray-500">
-                    {Math.round((tasksByStatus.completed / tasks.length) * 100)}%
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">In Progress</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">{tasksByStatus['in-progress']}</div>
+                    <div className="text-xs text-gray-500">
+                      {getPercentage(tasksByStatus['in-progress'], tasks.length)}%
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Pending</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">{tasksByStatus.pending}</div>
+                    <div className="text-xs text-gray-500">
+                      {getPercentage(tasksByStatus.pending, tasks.length)}%
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">In Progress</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium">{tasksByStatus['in-progress']}</div>
-                  <div className="text-xs text-gray-500">
-                    {Math.round((tasksByStatus['in-progress'] / tasks.length) * 100)}%
-                  </div>
-                </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <PieChart className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No task data available</p>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Pending</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium">{tasksByStatus.pending}</div>
-                  <div className="text-xs text-gray-500">
-                    {Math.round((tasksByStatus.pending / tasks.length) * 100)}%
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -176,75 +205,103 @@ const Analytics = () => {
             <CardDescription>Distribution of tasks by priority level</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">High Priority</span>
-                  <span className="text-sm font-medium">{tasksByPriority.high} tasks</span>
+            {stats.totalTasks > 0 ? (
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">High Priority</span>
+                    </div>
+                    <span className="text-sm font-medium">{tasksByPriority.high} tasks</span>
+                  </div>
+                  <Progress 
+                    value={getPercentage(tasksByPriority.high, tasks.length)} 
+                    className="h-2"
+                  />
                 </div>
-                <Progress 
-                  value={(tasksByPriority.high / tasks.length) * 100} 
-                  className="h-2 bg-red-100"
-                />
-              </div>
-              
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Medium Priority</span>
-                  <span className="text-sm font-medium">{tasksByPriority.medium} tasks</span>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">Medium Priority</span>
+                    </div>
+                    <span className="text-sm font-medium">{tasksByPriority.medium} tasks</span>
+                  </div>
+                  <Progress 
+                    value={getPercentage(tasksByPriority.medium, tasks.length)} 
+                    className="h-2"
+                  />
                 </div>
-                <Progress 
-                  value={(tasksByPriority.medium / tasks.length) * 100} 
-                  className="h-2 bg-yellow-100"
-                />
-              </div>
-              
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Low Priority</span>
-                  <span className="text-sm font-medium">{tasksByPriority.low} tasks</span>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">Low Priority</span>
+                    </div>
+                    <span className="text-sm font-medium">{tasksByPriority.low} tasks</span>
+                  </div>
+                  <Progress 
+                    value={getPercentage(tasksByPriority.low, tasks.length)} 
+                    className="h-2"
+                  />
                 </div>
-                <Progress 
-                  value={(tasksByPriority.low / tasks.length) * 100} 
-                  className="h-2 bg-green-100"
-                />
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No priority data available</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Team Performance */}
+      {/* Additional Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Upcoming Deadlines */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Team Performance
+              <Calendar className="h-5 w-5" />
+              Upcoming Deadlines
             </CardTitle>
-            <CardDescription>Individual team member productivity metrics</CardDescription>
+            <CardDescription>Tasks due in the next 7 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mockData.teamMembers.slice(0, 5).map((member) => (
-                <div key={member.id} className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-sm">{member.name}</div>
-                    <div className="text-xs text-gray-500">{member.role}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium text-sm">{member.tasksCount} tasks</div>
-                    <div className={`text-xs px-2 py-1 rounded-full ${
-                      member.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {member.status}
+            {upcomingDeadlines.length > 0 ? (
+              <div className="space-y-4">
+                {upcomingDeadlines.slice(0, 5).map((task) => {
+                  const dueDate = new Date(task.dueDate);
+                  const diffTime = dueDate - today;
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  
+                  return (
+                    <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div>
+                        <div className="font-medium text-sm">{task.title}</div>
+                        <div className="text-xs text-gray-500 capitalize">{task.priority} priority</div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-sm font-medium ${
+                          diffDays === 0 ? 'text-red-600' : 
+                          diffDays <= 2 ? 'text-orange-600' : 'text-blue-600'
+                        }`}>
+                          {diffDays === 0 ? 'Due today' : `${diffDays} days`}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No upcoming deadlines</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -252,42 +309,42 @@ const Analytics = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Recent Activity Summary
+              <Clock className="h-5 w-5" />
+              Productivity Insights
             </CardTitle>
-            <CardDescription>Key metrics from the past 30 days</CardDescription>
+            <CardDescription>Your task management patterns</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Tasks Created</span>
+                <span className="text-sm text-gray-600">Total Tasks Created</span>
                 <div className="text-right">
-                  <div className="font-medium">24</div>
-                  <div className="text-xs text-green-600">+15% vs prev month</div>
+                  <div className="font-medium">{stats.totalTasks}</div>
                 </div>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Tasks Completed</span>
+                <span className="text-sm text-gray-600">Average Completion Rate</span>
                 <div className="text-right">
-                  <div className="font-medium">18</div>
-                  <div className="text-xs text-green-600">+8% vs prev month</div>
+                  <div className="font-medium">{stats.completionRate}%</div>
                 </div>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Projects Started</span>
+                <span className="text-sm text-gray-600">Tasks This Week</span>
                 <div className="text-right">
-                  <div className="font-medium">3</div>
-                  <div className="text-xs text-blue-600">Same as prev month</div>
+                  <div className="font-medium">{thisWeek.length}</div>
+                  <div className="text-xs text-gray-500">{completedThisWeek} completed</div>
                 </div>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Average Response Time</span>
+                <span className="text-sm text-gray-600">Tasks Needing Attention</span>
                 <div className="text-right">
-                  <div className="font-medium">2.4h</div>
-                  <div className="text-xs text-green-600">-0.3h vs prev month</div>
+                  <div className="font-medium text-red-600">{overdueTasks.length + upcomingDeadlines.length}</div>
+                  <div className="text-xs text-gray-500">
+                    {overdueTasks.length} overdue, {upcomingDeadlines.length} due soon
+                  </div>
                 </div>
               </div>
             </div>
