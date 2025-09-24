@@ -28,6 +28,10 @@ const Dashboard = () => {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [emergentLoading, setEmergentLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [taskSummary, setTaskSummary] = useState("");
+  const [loadingSummary, setLoadingSummary] = useState(false);
   
   // Handle Emergent Auth callback on dashboard
   useEffect(() => {
