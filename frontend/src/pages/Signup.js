@@ -4,10 +4,9 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Separator } from '../components/ui/separator';
 import { useToast } from '../hooks/use-toast';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Mail, Lock, User, Chrome } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -18,7 +17,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const { signup, initiateGoogleAuth, isAuthenticated } = useAuth();
+  const { signup, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
   // Redirect if already authenticated
@@ -70,10 +69,6 @@ const Signup = () => {
     setLoading(false);
   };
 
-  const handleGoogleSignup = () => {
-    initiateGoogleAuth();
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -91,25 +86,6 @@ const Signup = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Google Signup Button */}
-            <Button
-              variant="outline"
-              className="w-full h-11"
-              onClick={handleGoogleSignup}
-            >
-              <Chrome className="mr-2 h-4 w-4" />
-              Continue with Google
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-
             {/* Signup Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
