@@ -133,7 +133,7 @@ const TaskCard = ({ task, onEdit, compact = false }) => {
 
   return (
     <Card className="group hover:shadow-md transition-all duration-200 hover:border-blue-200">
-      <CardContent className="p-4">
+      <CardContent className="p-3 sm:p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-start gap-3 flex-1">
             <Checkbox 
