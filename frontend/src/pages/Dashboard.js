@@ -412,15 +412,15 @@ const Dashboard = () => {
 
           {/* AI Task Summary */}
           <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-blue-600" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 Smart Summary
                 <Badge variant="secondary" className="text-xs">AI</Badge>
               </CardTitle>
-              <CardDescription>AI-powered overview of your tasks</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">AI-powered overview of your tasks</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-4">
                 {taskSummary ? (
                   <div className="p-4 bg-white rounded-lg shadow-sm border">
