@@ -84,6 +84,18 @@ const Dashboard = () => {
     setEditingTask(null);
   };
 
+  // Show loading state while processing Emergent Auth
+  if (emergentLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600">Setting up your account...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
