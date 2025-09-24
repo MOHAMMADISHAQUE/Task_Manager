@@ -227,7 +227,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Authentication system comprehensive testing completed"
+    - "Emergent Auth Login Initiation (GET /api/auth/emergent/login)"
+    - "Emergent Auth Callback (POST /api/auth/emergent/callback)"
+    - "Account linking functionality"
+    - "Dual authentication system integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
