@@ -10,6 +10,7 @@ from auth.utils import (
     generate_reset_token, hash_token, get_session_expiry, get_reset_token_expiry
 )
 from auth.dependencies import get_current_user
+from seed_data import initialize_new_user
 import logging
 
 logger = logging.getLogger(__name__)
