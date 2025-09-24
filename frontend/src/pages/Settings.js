@@ -9,6 +9,7 @@ import { Separator } from "../components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../contexts/AuthContext";
+import ChangePasswordDialog from "../components/ChangePasswordDialog";
 import { 
   User,
   Bell,
