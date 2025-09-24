@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement dual authentication system (email/password + Emergent Auth) for SmartTask AI with account linking functionality"
+user_problem_statement: "Test the new AI-powered features for SmartTask AI: Natural Language Task Creation, AI Task Suggestions, and AI Task Summary endpoints"
 
 backend:
   - task: "User Registration (POST /api/auth/signup)"
