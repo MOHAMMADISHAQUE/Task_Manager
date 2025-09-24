@@ -111,11 +111,11 @@ const Signup = () => {
     setEmergentLoading(true);
     
     try {
-      // Get the current URL as redirect URL
-      const currentUrl = window.location.origin + '/signup';
+      // Redirect directly to dashboard after auth
+      const dashboardUrl = window.location.origin + '/dashboard';
       
       // Redirect to Emergent Auth
-      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(currentUrl)}`;
+      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(dashboardUrl)}`;
       window.location.href = authUrl;
     } catch (error) {
       toast({
