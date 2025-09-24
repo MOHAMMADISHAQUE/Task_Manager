@@ -113,10 +113,10 @@ const TaskCard = ({ task, onEdit, compact = false }) => {
             <h4 className={`font-medium truncate ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
               {task.title}
             </h4>
-            {task.dueDate && (
+            {task.due_date && (
               <div className={`flex items-center gap-1 text-xs mt-1 ${isOverdue() ? 'text-red-600' : 'text-gray-500'}`}>
                 <Calendar className="h-3 w-3" />
-                {formatDate(task.dueDate)}
+                {formatDate(task.due_date)}
                 {isOverdue() && <span className="text-red-600 font-medium">(Overdue)</span>}
               </div>
             )}
