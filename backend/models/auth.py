@@ -8,8 +8,9 @@ class User(BaseModel):
     name: str
     email: EmailStr
     picture: Optional[str] = None
-    auth_provider: str = "email"  # Only "email" now
-    password_hash: Optional[str] = None
+    auth_provider: str = "email"  # "email" or "emergent"
+    password_hash: Optional[str] = None  # Only for email auth
+    google_id: Optional[str] = None  # Only for emergent auth
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     is_active: bool = True
