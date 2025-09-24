@@ -361,8 +361,8 @@ const Settings = () => {
                   <div className="text-xs text-gray-500">Weekly summary of your productivity</div>
                 </div>
                 <Switch
-                  checked={notifications.weeklyDigest}
-                  onCheckedChange={(value) => handleNotificationChange('weeklyDigest', value)}
+                  checked={notifications.weekly_digest}
+                  onCheckedChange={(value) => handleNotificationChange('weekly_digest', value)}
                 />
               </div>
             </div>
