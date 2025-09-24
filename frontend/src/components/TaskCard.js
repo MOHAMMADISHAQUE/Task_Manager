@@ -194,10 +194,10 @@ const TaskCard = ({ task, onEdit, compact = false }) => {
           </Badge>
         </div>
 
-        {task.dueDate && (
+        {task.due_date && (
           <div className={`flex items-center gap-1 text-sm ${isOverdue() ? 'text-red-600' : 'text-gray-500'}`}>
             <Calendar className="h-4 w-4" />
-            <span>Due: {formatDate(task.dueDate)}</span>
+            <span>Due: {formatDate(task.due_date)}</span>
             {isOverdue() && <span className="text-red-600 font-medium">(Overdue)</span>}
           </div>
         )}
@@ -205,10 +205,10 @@ const TaskCard = ({ task, onEdit, compact = false }) => {
         <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs text-gray-500">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            <span>Created {formatDate(task.createdAt)}</span>
+            <span>Created {formatDate(task.created_at)}</span>
           </div>
-          {task.updatedAt !== task.createdAt && (
-            <span>Updated {formatDate(task.updatedAt)}</span>
+          {task.updated_at !== task.created_at && (
+            <span>Updated {formatDate(task.updated_at)}</span>
           )}
         </div>
       </CardContent>
