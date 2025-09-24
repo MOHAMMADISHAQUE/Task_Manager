@@ -200,7 +200,7 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={loading}
+                disabled={loading || emergentLoading}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
