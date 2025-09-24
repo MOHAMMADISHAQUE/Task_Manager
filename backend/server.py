@@ -64,11 +64,13 @@ auth_router = create_auth_router(db)
 emergent_auth_router = create_emergent_auth_router(db)
 tasks_router = create_tasks_router(db)
 projects_router = create_projects_router(db)
+ai_router = create_ai_router(db)
 
 api_router.include_router(auth_router)
 api_router.include_router(emergent_auth_router)
 api_router.include_router(tasks_router)
 api_router.include_router(projects_router)
+api_router.include_router(ai_router)
 
 # Include the router in the main app
 app.include_router(api_router)
