@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Chrome } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
