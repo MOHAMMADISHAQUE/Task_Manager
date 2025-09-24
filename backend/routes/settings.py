@@ -199,6 +199,7 @@ def create_settings_router(db: AsyncIOMotorDatabase) -> APIRouter:
         # Get login sessions (last 5)
         sessions = await db.sessions.find(
             {"user_id": user["id"]}, 
+            {"_id": 0},  # Exclude ObjectId field
             sort=[("created_at", -1)]
         ).limit(5).to_list(length=5)
         
