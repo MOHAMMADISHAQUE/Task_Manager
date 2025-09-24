@@ -199,7 +199,7 @@ backend:
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the responsive design improvements for SmartTask AI: Mobile Navigation, Dashboard Layout on Mobile, Tasks Page Mobile Layout, and Content Reflow at different viewport sizes"
+user_problem_statement: "Test the new Settings and Notifications functionality for SmartTask AI: Profile Settings, Notification Settings, Password Change, Security Info, and complete Notifications CRUD operations"
 
 backend:
   - task: "User Registration (POST /api/auth/signup)"
