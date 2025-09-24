@@ -197,7 +197,7 @@ const Tasks = () => {
 
       {/* Smart Input Box */}
       <Card className="border-2 border-dashed border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="h-5 w-5 text-blue-600" />
             <h3 className="font-semibold text-gray-900">Smart Task Creator</h3>
