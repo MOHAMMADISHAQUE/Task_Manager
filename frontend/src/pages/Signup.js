@@ -16,9 +16,11 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emergentLoading, setEmergentLoading] = useState(false);
   
-  const { signup, isAuthenticated } = useAuth();
+  const { signup, loginWithEmergent, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Redirect if already authenticated
   if (isAuthenticated) {
