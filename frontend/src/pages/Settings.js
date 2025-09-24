@@ -253,9 +253,17 @@ const Settings = () => {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
+            <Button 
+              onClick={saveProfile}
+              disabled={saving || loading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {saving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </CardContent>
