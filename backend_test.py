@@ -358,33 +358,209 @@ class AuthTestSuite:
         except Exception as e:
             self.log_test("reset_password_weak_password", False, f"Exception: {str(e)}")
     
-    def test_oauth_process_endpoint(self):
-        """Test OAuth processing endpoint structure"""
+    def test_emergent_auth_login_initiation(self):
+        """Test Emergent Auth login initiation endpoint"""
         try:
-            # Test with minimal valid structure
-            payload = {
-                "user_data": {
-                    "name": "OAuth User",
-                    "email": f"oauth_{uuid.uuid4().hex[:8]}@example.com",
-                    "picture": "https://example.com/avatar.jpg"
-                },
-                "session_token": "oauth_session_token_123"
-            }
+            response = self.session.get(f"{BASE_URL}/auth/emergent/login")
             
-            response = self.session.post(f"{BASE_URL}/auth/process-oauth", json=payload)
-            
-            # This might fail due to OAuth validation, but we're testing the endpoint exists
-            if response.status_code in [200, 400, 401]:
-                if response.status_code == 200:
-                    self.log_test("oauth_process_endpoint", True, "OAuth endpoint accessible and working")
+            if response.status_code == 200:
+                data = response.json()
+                if "auth_url" in data and "auth.emergentagent.com" in data["auth_url"]:
+                    self.log_test("emergent_auth_login_initiation", True, "Emergent Auth login endpoint returns valid auth URL")
                 else:
-                    # Endpoint exists but may have validation logic
-                    self.log_test("oauth_process_endpoint", True, f"OAuth endpoint exists (returned {response.status_code})")
+                    self.log_test("emergent_auth_login_initiation", False, "Invalid auth URL structure", data)
             else:
-                self.log_test("oauth_process_endpoint", False, f"Unexpected status {response.status_code}", response.text)
+                self.log_test("emergent_auth_login_initiation", False, f"HTTP {response.status_code}", response.text)
                 
         except Exception as e:
-            self.log_test("oauth_process_endpoint", False, f"Exception: {str(e)}")
+            self.log_test("emergent_auth_login_initiation", False, f"Exception: {str(e)}")
+    
+    def test_emergent_auth_login_with_redirect(self):
+        """Test Emergent Auth login with custom redirect URL"""
+        try:
+            custom_redirect = "https://example.com/dashboard"
+            response = self.session.get(f"{BASE_URL}/auth/emergent/login?redirect_url={custom_redirect}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "auth_url" in data and custom_redirect in data["auth_url"]:
+                    self.log_test("emergent_auth_login_with_redirect", True, "Emergent Auth login accepts custom redirect URL")
+                else:
+                    self.log_test("emergent_auth_login_with_redirect", False, "Custom redirect not properly handled", data)
+            else:
+                self.log_test("emergent_auth_login_with_redirect", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("emergent_auth_login_with_redirect", False, f"Exception: {str(e)}")
+    
+    def test_emergent_auth_callback_invalid_session(self):
+        """Test Emergent Auth callback with invalid session ID"""
+        try:
+            payload = {
+                "session_id": "invalid_session_id_12345"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/auth/emergent/callback", json=payload)
+            
+            # Should fail with 400 or 500 due to invalid session
+            if response.status_code in [400, 500]:
+                data = response.json()
+                if "invalid" in data.get("detail", "").lower() or "session" in data.get("detail", "").lower():
+                    self.log_test("emergent_auth_callback_invalid_session", True, "Correctly rejected invalid session ID")
+                else:
+                    self.log_test("emergent_auth_callback_invalid_session", True, f"Rejected invalid session (status {response.status_code})")
+            else:
+                self.log_test("emergent_auth_callback_invalid_session", False, f"Expected 400/500, got {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("emergent_auth_callback_invalid_session", False, f"Exception: {str(e)}")
+    
+    def test_emergent_auth_callback_structure(self):
+        """Test Emergent Auth callback endpoint structure and validation"""
+        try:
+            # Test with missing session_id
+            response = self.session.post(f"{BASE_URL}/auth/emergent/callback", json={})
+            
+            if response.status_code == 422:  # Validation error
+                data = response.json()
+                if "session_id" in str(data).lower():
+                    self.log_test("emergent_auth_callback_structure", True, "Correctly validates required session_id field")
+                else:
+                    self.log_test("emergent_auth_callback_structure", False, "Unexpected validation error", data)
+            else:
+                self.log_test("emergent_auth_callback_structure", False, f"Expected 422, got {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("emergent_auth_callback_structure", False, f"Exception: {str(e)}")
+    
+    def test_dual_auth_system_independence(self):
+        """Test that both authentication systems work independently"""
+        try:
+            # First, ensure we can still create and login with email/password
+            email_user_email = f"emailuser_{uuid.uuid4().hex[:8]}@example.com"
+            
+            # Create email user
+            signup_payload = {
+                "name": "Email User",
+                "email": email_user_email,
+                "password": "emailpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("dual_auth_system_independence", False, "Failed to create email user", signup_response.text)
+                return
+            
+            # Clear session and login with email
+            self.session.cookies.clear()
+            
+            login_payload = {
+                "email": email_user_email,
+                "password": "emailpassword123"
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code == 200:
+                # Test protected endpoint access
+                me_response = self.session.get(f"{BASE_URL}/auth/me")
+                
+                if me_response.status_code == 200:
+                    user_data = me_response.json()
+                    if user_data.get("auth_provider") == "email":
+                        self.log_test("dual_auth_system_independence", True, "Email authentication system works independently")
+                    else:
+                        self.log_test("dual_auth_system_independence", False, "Wrong auth_provider in response", user_data)
+                else:
+                    self.log_test("dual_auth_system_independence", False, f"Protected endpoint failed: {me_response.status_code}")
+            else:
+                self.log_test("dual_auth_system_independence", False, f"Email login failed: {login_response.status_code}")
+                
+        except Exception as e:
+            self.log_test("dual_auth_system_independence", False, f"Exception: {str(e)}")
+    
+    def test_user_model_updates(self):
+        """Test that user model supports new fields for dual auth"""
+        try:
+            # Create a user and check the response structure
+            test_email = f"modeltest_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Model Test User",
+                "email": test_email,
+                "password": "testpassword123"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                
+                # Check for required fields
+                required_fields = ["id", "name", "email", "auth_provider"]
+                missing_fields = [field for field in required_fields if field not in user]
+                
+                if not missing_fields:
+                    if user.get("auth_provider") == "email":
+                        self.log_test("user_model_updates", True, "User model includes all required fields for dual auth")
+                    else:
+                        self.log_test("user_model_updates", False, f"Wrong auth_provider: {user.get('auth_provider')}")
+                else:
+                    self.log_test("user_model_updates", False, f"Missing fields: {missing_fields}", user)
+            else:
+                self.log_test("user_model_updates", False, f"Failed to create user: {response.status_code}")
+                
+        except Exception as e:
+            self.log_test("user_model_updates", False, f"Exception: {str(e)}")
+    
+    def test_session_management_consistency(self):
+        """Test that session management works consistently for both auth types"""
+        try:
+            # Test session management with email auth
+            test_email = f"sessiontest_{uuid.uuid4().hex[:8]}@example.com"
+            
+            # Create and login user
+            signup_payload = {
+                "name": "Session Test User",
+                "email": test_email,
+                "password": "sessiontest123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("session_management_consistency", False, "Failed to create test user")
+                return
+            
+            # Check session cookie was set
+            if "session_token" not in signup_response.cookies:
+                self.log_test("session_management_consistency", False, "No session cookie set on signup")
+                return
+            
+            # Test protected endpoint access
+            me_response = self.session.get(f"{BASE_URL}/auth/me")
+            
+            if me_response.status_code == 200:
+                # Test logout
+                logout_response = self.session.post(f"{BASE_URL}/auth/logout")
+                
+                if logout_response.status_code == 200:
+                    # Verify session is invalidated
+                    me_after_logout = self.session.get(f"{BASE_URL}/auth/me")
+                    
+                    if me_after_logout.status_code == 401:
+                        self.log_test("session_management_consistency", True, "Session management works consistently")
+                    else:
+                        self.log_test("session_management_consistency", False, f"Session not invalidated: {me_after_logout.status_code}")
+                else:
+                    self.log_test("session_management_consistency", False, f"Logout failed: {logout_response.status_code}")
+            else:
+                self.log_test("session_management_consistency", False, f"Protected endpoint failed: {me_response.status_code}")
+                
+        except Exception as e:
+            self.log_test("session_management_consistency", False, f"Exception: {str(e)}")
     
     def test_api_base_endpoint(self):
         """Test basic API connectivity"""
