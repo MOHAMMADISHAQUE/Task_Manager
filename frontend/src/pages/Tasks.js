@@ -70,6 +70,48 @@ const Tasks = () => {
     setEditingTask(null);
   };
 
+  const handleNaturalLanguageTask = async () => {
+    if (!naturalLanguageText.trim()) return;
+
+    setIsCreatingTask(true);
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${BACKEND_URL}/api/ai/parse-task`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          text: naturalLanguageText.trim()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
+
+      const result = await response.json();
+      
+      toast({
+        title: "Task Created! ✨",
+        description: result.ai_used ? "AI helped parse your request" : "Task created successfully",
+      });
+
+      setNaturalLanguageText("");
+      await refreshTasks();
+      
+    } catch (error) {
+      toast({
+        title: "Error Creating Task",
+        description: "Please try again or use the manual form",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
+
   const TaskList = ({ tasks: taskList, emptyMessage }) => (
     <div className="space-y-4">
       {taskList.length > 0 ? (
