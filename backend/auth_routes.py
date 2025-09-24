@@ -52,6 +52,14 @@ def create_auth_router(db: AsyncIOMotorDatabase) -> APIRouter:
         # Save user to database
         await db.users.insert_one(user.dict())
         
+        # Initialize new user with sample data
+        try:
+            await initialize_new_user(user.id)
+            logger.info(f"Sample data created for new user: {user.id}")
+        except Exception as e:
+            logger.error(f"Failed to create sample data for user {user.id}: {e}")
+            # Don't fail signup if sample data creation fails
+        
         # Create session
         session_token = generate_session_token()
         hashed_session_token = hash_token(session_token)
