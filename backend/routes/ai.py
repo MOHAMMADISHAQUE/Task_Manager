@@ -298,9 +298,23 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
         completed_tasks = len([t for t in tasks if t.get('status') == 'completed'])
         pending_tasks = total_tasks - completed_tasks
         
-        overdue_tasks = len([t for t in tasks if t.get('due_date') and 
-                           datetime.fromisoformat(t['due_date'].replace('Z', '+00:00')) < datetime.now(timezone.utc) and
-                           t.get('status') != 'completed'])
+        overdue_tasks = 0
+        for t in tasks:
+            if t.get('due_date') and t.get('status') != 'completed':
+                try:
+                    due_date = t['due_date']
+                    if isinstance(due_date, str):
+                        due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+                    elif isinstance(due_date, datetime):
+                        # Already a datetime object
+                        if due_date.tzinfo is None:
+                            due_date = due_date.replace(tzinfo=timezone.utc)
+                    
+                    if due_date < datetime.now(timezone.utc):
+                        overdue_tasks += 1
+                except (ValueError, TypeError):
+                    # Skip invalid dates
+                    continue
         
         high_priority_tasks = len([t for t in tasks if t.get('priority') == 'high' and t.get('status') != 'completed'])
         
