@@ -180,17 +180,29 @@ backend:
           agent: "testing"
           comment: "✅ Password reset tested successfully: invalid tokens rejected (400), weak passwords rejected (400). Token validation occurs before password validation as expected."
 
-  - task: "OAuth Processing (POST /api/auth/process-oauth)"
+  - task: "Emergent Auth Login Initiation (GET /api/auth/emergent/login)"
     implemented: true
-    working: true
-    file: "/app/backend/auth_routes.py"
+    working: "NA"
+    file: "/app/backend/routes/emergent_auth.py"
     stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
-        - working: true
-          agent: "testing"
-          comment: "✅ OAuth processing endpoint accessible and functional (200). Handles user data and session token processing for Emergent Auth integration."
+        - working: "NA"
+          agent: "main"
+          comment: "✅ Implemented Emergent Auth login endpoint that redirects to Emergent Auth service"
+
+  - task: "Emergent Auth Callback (POST /api/auth/emergent/callback)"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/routes/emergent_auth.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "✅ Implemented Emergent Auth callback endpoint with account linking functionality for existing email users"
 
   - task: "Session Management & Security"
     implemented: true
