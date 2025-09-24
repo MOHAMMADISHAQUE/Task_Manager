@@ -2,6 +2,7 @@ import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { TaskProvider } from "./contexts/TaskContext";
 import { Toaster } from "./components/ui/toaster";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
@@ -20,30 +21,32 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            
-            {/* Protected Routes */}
-            <Route path="/*" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/tasks" element={<Tasks />} />
-                    <Route path="/projects" element={<Projects />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/settings" element={<Settings />} />
-                  </Routes>
-                </Layout>
-              </ProtectedRoute>
-            } />
-          </Routes>
-          <Toaster />
+          <TaskProvider>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              
+              {/* Protected Routes */}
+              <Route path="/*" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/tasks" element={<Tasks />} />
+                      <Route path="/projects" element={<Projects />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/settings" element={<Settings />} />
+                    </Routes>
+                  </Layout>
+                </ProtectedRoute>
+              } />
+            </Routes>
+            <Toaster />
+          </TaskProvider>
         </AuthProvider>
       </BrowserRouter>
     </div>
