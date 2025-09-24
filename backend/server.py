@@ -75,7 +75,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000", 
         "http://127.0.0.1:3000",
-        "https://smarttask-app-1.preview.emergentagent.com"
+        "https://taskmaster-ai-16.preview.emergentagent.com"
     ],
     allow_methods=["*"],
     allow_headers=["*"],

@@ -12,7 +12,7 @@ from datetime import datetime
 import sys
 
 # Configuration
-BASE_URL = "https://smarttask-app-1.preview.emergentagent.com/api"
+BASE_URL = "https://taskmaster-ai-16.preview.emergentagent.com/api"
 TEST_USER_EMAIL = f"testuser_{uuid.uuid4().hex[:8]}@example.com"
 TEST_USER_NAME = "John Smith"
 TEST_USER_PASSWORD = "securepassword123"
