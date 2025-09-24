@@ -20,6 +20,43 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Check for emergent auth callback
+  useEffect(() => {
+    const handleEmergentCallback = async () => {
+      const hash = window.location.hash;
+      const urlParams = new URLSearchParams(hash.substring(1));
+      const sessionId = urlParams.get('session_id');
+      
+      if (sessionId) {
+        setEmergentLoading(true);
+        const result = await loginWithEmergent(sessionId);
+        
+        if (result.success) {
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully logged in with Google.",
+          });
+          
+          // Clean the URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          // Redirect to dashboard
+          const from = location.state?.from?.pathname || '/dashboard';
+          navigate(from, { replace: true });
+        } else {
+          toast({
+            title: "Login Failed",
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+        setEmergentLoading(false);
+      }
+    };
+
+    handleEmergentCallback();
+  }, [loginWithEmergent, toast, location.state, navigate]);
+
   // Redirect to dashboard if already authenticated
   if (isAuthenticated) {
     const from = location.state?.from?.pathname || '/dashboard';
