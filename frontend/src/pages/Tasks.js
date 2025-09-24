@@ -170,12 +170,12 @@ const Tasks = () => {
           <div className="text-lg sm:text-2xl font-bold text-blue-700">{pendingTasks.length}</div>
         </div>
         
-        <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 rounded-lg border border-yellow-200">
-          <div className="flex items-center gap-2 text-yellow-600 mb-1">
-            <Flag className="h-4 w-4" />
-            <span className="text-sm font-medium">In Progress</span>
+        <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-3 sm:p-4 rounded-lg border border-yellow-200">
+          <div className="flex items-center gap-1 sm:gap-2 text-yellow-600 mb-1">
+            <Flag className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm font-medium">In Progress</span>
           </div>
-          <div className="text-2xl font-bold text-yellow-700">{inProgressTasks.length}</div>
+          <div className="text-lg sm:text-2xl font-bold text-yellow-700">{inProgressTasks.length}</div>
         </div>
         
         <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
