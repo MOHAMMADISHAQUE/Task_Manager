@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import { useAuth } from './AuthContext';
 
 const TaskContext = createContext();
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 export const useTask = () => {
   const context = useContext(TaskContext);
@@ -12,30 +16,48 @@ export const useTask = () => {
 };
 
 export const TaskProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Load tasks from localStorage on component mount
+  // Load tasks and projects when user is authenticated
   useEffect(() => {
-    if (user) {
-      const savedTasks = localStorage.getItem(`tasks_${user.id}`);
-      if (savedTasks) {
-        try {
-          setTasks(JSON.parse(savedTasks));
-        } catch (error) {
-          console.error('Error loading tasks from localStorage:', error);
-        }
-      }
+    if (isAuthenticated && user) {
+      loadTasks();
+      loadProjects();
+    } else {
+      setTasks([]);
+      setProjects([]);
     }
-  }, [user]);
+  }, [isAuthenticated, user]);
 
-  // Save tasks to localStorage whenever tasks change
-  useEffect(() => {
-    if (user && tasks.length >= 0) {
-      localStorage.setItem(`tasks_${user.id}`, JSON.stringify(tasks));
+  const loadTasks = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/tasks/`, {
+        withCredentials: true
+      });
+      setTasks(response.data || []);
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      setTasks([]);
+    } finally {
+      setLoading(false);
     }
-  }, [tasks, user]);
+  };
+
+  const loadProjects = async () => {
+    try {
+      const response = await axios.get(`${API}/projects/`, {
+        withCredentials: true
+      });
+      setProjects(response.data || []);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      setProjects([]);
+    }
+  };
 
   const createTask = async (taskData) => {
     try {
@@ -46,22 +68,26 @@ export const TaskProvider = ({ children }) => {
         throw new Error('Task title is required');
       }
 
-      const newTask = {
-        id: Date.now().toString(), // Simple ID generation
+      const payload = {
         title: taskData.title.trim(),
         description: taskData.description?.trim() || '',
         priority: taskData.priority || 'medium',
-        status: 'pending',
-        dueDate: taskData.dueDate || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        userId: user.id
+        due_date: taskData.dueDate || null,
+        project_id: taskData.projectId || null,
+        tags: taskData.tags || []
       };
 
-      setTasks(prevTasks => [newTask, ...prevTasks]);
-      return { success: true, task: newTask };
+      const response = await axios.post(`${API}/tasks/`, payload, {
+        withCredentials: true
+      });
+
+      // Add new task to local state
+      setTasks(prevTasks => [response.data, ...prevTasks]);
+      
+      return { success: true, task: response.data };
     } catch (error) {
-      return { success: false, message: error.message };
+      const message = error.response?.data?.detail || error.message || 'Failed to create task';
+      return { success: false, message };
     } finally {
       setLoading(false);
     }
@@ -76,23 +102,30 @@ export const TaskProvider = ({ children }) => {
         throw new Error('Task title is required');
       }
 
+      const payload = {};
+      if (updates.title !== undefined) payload.title = updates.title.trim();
+      if (updates.description !== undefined) payload.description = updates.description?.trim() || '';
+      if (updates.status !== undefined) payload.status = updates.status;
+      if (updates.priority !== undefined) payload.priority = updates.priority;
+      if (updates.dueDate !== undefined) payload.due_date = updates.dueDate;
+      if (updates.projectId !== undefined) payload.project_id = updates.projectId;
+      if (updates.tags !== undefined) payload.tags = updates.tags;
+
+      const response = await axios.put(`${API}/tasks/${taskId}`, payload, {
+        withCredentials: true
+      });
+
+      // Update local state
       setTasks(prevTasks => 
         prevTasks.map(task => 
-          task.id === taskId 
-            ? { 
-                ...task, 
-                ...updates, 
-                title: updates.title?.trim() || task.title,
-                description: updates.description?.trim() ?? task.description,
-                updatedAt: new Date().toISOString() 
-              }
-            : task
+          task.id === taskId ? response.data : task
         )
       );
 
-      return { success: true };
+      return { success: true, task: response.data };
     } catch (error) {
-      return { success: false, message: error.message };
+      const message = error.response?.data?.detail || error.message || 'Failed to update task';
+      return { success: false, message };
     } finally {
       setLoading(false);
     }
@@ -101,10 +134,18 @@ export const TaskProvider = ({ children }) => {
   const deleteTask = async (taskId) => {
     try {
       setLoading(true);
+      
+      await axios.delete(`${API}/tasks/${taskId}`, {
+        withCredentials: true
+      });
+
+      // Remove from local state
       setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+      
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.message };
+      const message = error.response?.data?.detail || error.message || 'Failed to delete task';
+      return { success: false, message };
     } finally {
       setLoading(false);
     }
@@ -118,6 +159,95 @@ export const TaskProvider = ({ children }) => {
     return updateTask(taskId, { status: newStatus });
   };
 
+  const createProject = async (projectData) => {
+    try {
+      setLoading(true);
+      
+      if (!projectData.name?.trim()) {
+        throw new Error('Project name is required');
+      }
+
+      const payload = {
+        name: projectData.name.trim(),
+        description: projectData.description?.trim() || '',
+        priority: projectData.priority || 'medium',
+        due_date: projectData.dueDate || null,
+        team_members: projectData.teamMembers || []
+      };
+
+      const response = await axios.post(`${API}/projects/`, payload, {
+        withCredentials: true
+      });
+
+      setProjects(prevProjects => [response.data, ...prevProjects]);
+      
+      return { success: true, project: response.data };
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Failed to create project';
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProject = async (projectId, updates) => {
+    try {
+      setLoading(true);
+      
+      if (updates.name !== undefined && !updates.name?.trim()) {
+        throw new Error('Project name is required');
+      }
+
+      const payload = {};
+      if (updates.name !== undefined) payload.name = updates.name.trim();
+      if (updates.description !== undefined) payload.description = updates.description?.trim() || '';
+      if (updates.status !== undefined) payload.status = updates.status;
+      if (updates.priority !== undefined) payload.priority = updates.priority;
+      if (updates.progress !== undefined) payload.progress = updates.progress;
+      if (updates.dueDate !== undefined) payload.due_date = updates.dueDate;
+      if (updates.teamMembers !== undefined) payload.team_members = updates.teamMembers;
+
+      const response = await axios.put(`${API}/projects/${projectId}`, payload, {
+        withCredentials: true
+      });
+
+      setProjects(prevProjects => 
+        prevProjects.map(project => 
+          project.id === projectId ? response.data : project
+        )
+      );
+
+      return { success: true, project: response.data };
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Failed to update project';
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteProject = async (projectId) => {
+    try {
+      setLoading(true);
+      
+      await axios.delete(`${API}/projects/${projectId}`, {
+        withCredentials: true
+      });
+
+      setProjects(prevProjects => prevProjects.filter(project => project.id !== projectId));
+      
+      // Also remove tasks associated with this project
+      setTasks(prevTasks => prevTasks.filter(task => task.project_id !== projectId));
+      
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || 'Failed to delete project';
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getTasksByStatus = (status) => {
     return tasks.filter(task => task.status === status);
   };
@@ -126,14 +256,19 @@ export const TaskProvider = ({ children }) => {
     return tasks.filter(task => task.priority === priority);
   };
 
+  const getTasksByProject = (projectId) => {
+    return tasks.filter(task => task.project_id === projectId);
+  };
+
   const getTaskStats = () => {
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(t => t.status === 'completed').length;
     const pendingTasks = tasks.filter(t => t.status === 'pending').length;
     const inProgressTasks = tasks.filter(t => t.status === 'in-progress').length;
+    
     const overdueTasks = tasks.filter(t => {
-      if (t.status === 'completed' || !t.dueDate) return false;
-      return new Date(t.dueDate) < new Date();
+      if (t.status === 'completed' || !t.due_date) return false;
+      return new Date(t.due_date) < new Date();
     }).length;
 
     return {
@@ -148,14 +283,21 @@ export const TaskProvider = ({ children }) => {
 
   const value = {
     tasks,
+    projects,
     loading,
     createTask,
     updateTask,
     deleteTask,
     toggleTaskStatus,
+    createProject,
+    updateProject,
+    deleteProject,
     getTasksByStatus,
     getTasksByPriority,
-    getTaskStats
+    getTasksByProject,
+    getTaskStats,
+    refreshTasks: loadTasks,
+    refreshProjects: loadProjects
   };
 
   return (
