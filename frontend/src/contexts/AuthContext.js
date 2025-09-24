@@ -138,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     forgotPassword,
     resetPassword,
+    loginWithEmergent,
     isAuthenticated: !!user
   };
 
