@@ -367,6 +367,89 @@ const Dashboard = () => {
           </Card>
         </div>
       )}
+
+      {/* AI-Powered Features */}
+      {tasks.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* AI Suggestions Panel */}
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-600" />
+                AI Suggestions
+                <Badge variant="secondary" className="text-xs">Smart</Badge>
+              </CardTitle>
+              <CardDescription>Personalized recommendations for better productivity</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingSuggestions ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                  <span className="ml-2 text-sm text-gray-600">Loading suggestions...</span>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {suggestions.map((suggestion, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg shadow-sm border">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <p className="text-sm text-gray-700">{suggestion}</p>
+                    </div>
+                  ))}
+                  <Button 
+                    onClick={loadAISuggestions}
+                    variant="outline" 
+                    size="sm"
+                    className="w-full mt-4 text-purple-600 hover:bg-purple-50"
+                    disabled={loadingSuggestions}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Suggestions
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* AI Task Summary */}
+          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-blue-600" />
+                Smart Summary
+                <Badge variant="secondary" className="text-xs">AI</Badge>
+              </CardTitle>
+              <CardDescription>AI-powered overview of your tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {taskSummary ? (
+                  <div className="p-4 bg-white rounded-lg shadow-sm border">
+                    <p className="text-sm text-gray-700">{taskSummary}</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Click below to generate an AI summary</p>
+                  </div>
+                )}
+                
+                <Button 
+                  onClick={loadTaskSummary}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={loadingSummary}
+                >
+                  {loadingSummary ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-2" />
+                  )}
+                  {loadingSummary ? 'Generating Summary...' : 'Generate AI Summary'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
