@@ -47,6 +47,9 @@ class ResetPasswordRequest(BaseModel):
     token: str
     password: str
 
+class EmergentSessionRequest(BaseModel):
+    session_id: str
+
 class UserResponse(BaseModel):
     id: str
     name: str
