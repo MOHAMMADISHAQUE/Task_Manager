@@ -32,8 +32,11 @@ const Tasks = () => {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [viewMode, setViewMode] = useState("all");
+  const [naturalLanguageText, setNaturalLanguageText] = useState("");
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
   
-  const { tasks, getTasksByStatus } = useTask();
+  const { tasks, getTasksByStatus, refreshTasks } = useTask();
+  const { toast } = useToast();
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
