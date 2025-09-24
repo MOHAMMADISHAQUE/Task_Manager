@@ -23,8 +23,11 @@ import TaskForm from "../components/TaskForm";
 
 const Dashboard = () => {
   const { tasks, getTaskStats } = useTask();
+  const { loginWithEmergent } = useAuth();
+  const { toast } = useToast();
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [emergentLoading, setEmergentLoading] = useState(false);
   
   const stats = getTaskStats();
   const recentTasks = tasks.slice(0, 6);
