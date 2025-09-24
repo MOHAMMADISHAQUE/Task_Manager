@@ -370,7 +370,7 @@ const Dashboard = () => {
 
       {/* AI-Powered Features */}
       {tasks.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-6">
           {/* AI Suggestions Panel */}
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
             <CardHeader>
