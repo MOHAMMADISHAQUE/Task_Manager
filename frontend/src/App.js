@@ -23,7 +23,8 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <TaskProvider>
-            <Routes>
+            <NotificationProvider>
+              <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
