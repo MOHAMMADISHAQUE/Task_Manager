@@ -217,7 +217,7 @@ const Dashboard = () => {
             <div className="mt-2">
               <Progress value={stats.completionRate} className="h-2" />
             </div>
-            <p className="text-xs text-gray-600 mt-2">
+            <p className="text-xs text-gray-600 mt-2 leading-tight">
               {stats.completionRate}% completion rate
             </p>
           </CardContent>
