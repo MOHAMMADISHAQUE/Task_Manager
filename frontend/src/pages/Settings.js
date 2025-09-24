@@ -350,8 +350,8 @@ const Settings = () => {
                   <div className="text-xs text-gray-500">Notifications about project status changes</div>
                 </div>
                 <Switch
-                  checked={notifications.projectUpdates}
-                  onCheckedChange={(value) => handleNotificationChange('projectUpdates', value)}
+                  checked={notifications.project_updates}
+                  onCheckedChange={(value) => handleNotificationChange('project_updates', value)}
                 />
               </div>
               
