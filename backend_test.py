@@ -579,9 +579,352 @@ class AuthTestSuite:
         except Exception as e:
             self.log_test("api_base_endpoint", False, f"Exception: {str(e)}")
     
+    def test_ai_parse_task_simple(self):
+        """Test AI natural language task parsing with simple input"""
+        try:
+            # First login to get session
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("ai_parse_task_simple", False, "Failed to login for test setup", login_response.text)
+                return
+            
+            # Test simple task parsing
+            payload = {
+                "text": "Remember to buy groceries"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/ai/parse-task", json=payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "success" in data and data["success"] and "task" in data:
+                    task = data["task"]
+                    if "title" in task and "description" in task and "priority" in task:
+                        self.log_test("ai_parse_task_simple", True, f"Simple task parsed successfully (AI used: {data.get('ai_used', False)})")
+                    else:
+                        self.log_test("ai_parse_task_simple", False, "Missing required task fields", data)
+                else:
+                    self.log_test("ai_parse_task_simple", False, "Invalid response structure", data)
+            else:
+                self.log_test("ai_parse_task_simple", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_parse_task_simple", False, f"Exception: {str(e)}")
+    
+    def test_ai_parse_task_with_date(self):
+        """Test AI task parsing with date expressions"""
+        try:
+            # Ensure logged in
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("ai_parse_task_with_date", False, "Failed to login for test setup")
+                return
+            
+            # Test task with date expression
+            payload = {
+                "text": "Call John tomorrow at 3 PM"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/ai/parse-task", json=payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "success" in data and data["success"] and "task" in data:
+                    task = data["task"]
+                    if "due_date" in task and task["due_date"]:
+                        self.log_test("ai_parse_task_with_date", True, f"Task with date parsed successfully (AI used: {data.get('ai_used', False)})")
+                    else:
+                        self.log_test("ai_parse_task_with_date", True, f"Task parsed but no due date extracted (AI used: {data.get('ai_used', False)})")
+                else:
+                    self.log_test("ai_parse_task_with_date", False, "Invalid response structure", data)
+            else:
+                self.log_test("ai_parse_task_with_date", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_parse_task_with_date", False, f"Exception: {str(e)}")
+    
+    def test_ai_parse_task_with_priority(self):
+        """Test AI task parsing with priority keywords"""
+        try:
+            # Ensure logged in
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("ai_parse_task_with_priority", False, "Failed to login for test setup")
+                return
+            
+            # Test task with priority keywords
+            payload = {
+                "text": "Finish quarterly report next Friday with high priority - this is urgent!"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/ai/parse-task", json=payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "success" in data and data["success"] and "task" in data:
+                    task = data["task"]
+                    priority = task.get("priority", "medium")
+                    if priority == "high":
+                        self.log_test("ai_parse_task_with_priority", True, f"High priority task parsed correctly (AI used: {data.get('ai_used', False)})")
+                    else:
+                        self.log_test("ai_parse_task_with_priority", True, f"Task parsed with priority: {priority} (AI used: {data.get('ai_used', False)})")
+                else:
+                    self.log_test("ai_parse_task_with_priority", False, "Invalid response structure", data)
+            else:
+                self.log_test("ai_parse_task_with_priority", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_parse_task_with_priority", False, f"Exception: {str(e)}")
+    
+    def test_ai_parse_task_without_auth(self):
+        """Test AI task parsing without authentication"""
+        try:
+            # Clear session
+            self.session.cookies.clear()
+            
+            payload = {
+                "text": "Test task without auth"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/ai/parse-task", json=payload)
+            
+            if response.status_code == 401:
+                self.log_test("ai_parse_task_without_auth", True, "Correctly rejected unauthenticated request")
+            else:
+                self.log_test("ai_parse_task_without_auth", False, f"Expected 401, got {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_parse_task_without_auth", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_no_tasks(self):
+        """Test AI suggestions for user with no tasks"""
+        try:
+            # Create a new user for this test
+            new_user_email = f"suggestions_test_{uuid.uuid4().hex[:8]}@example.com"
+            
+            # Signup new user
+            signup_payload = {
+                "name": "Suggestions Test User",
+                "email": new_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_suggestions_no_tasks", False, "Failed to create test user")
+                return
+            
+            # Get suggestions
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list) and len(data["suggestions"]) > 0:
+                    self.log_test("ai_suggestions_no_tasks", True, f"Starter suggestions provided: {len(data['suggestions'])} suggestions")
+                else:
+                    self.log_test("ai_suggestions_no_tasks", False, "No suggestions returned", data)
+            else:
+                self.log_test("ai_suggestions_no_tasks", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_no_tasks", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_with_tasks(self):
+        """Test AI suggestions for user with existing tasks"""
+        try:
+            # Login with main test user (who should have tasks from previous tests)
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("ai_suggestions_with_tasks", False, "Failed to login for test setup")
+                return
+            
+            # Get suggestions
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list) and len(data["suggestions"]) > 0:
+                    self.log_test("ai_suggestions_with_tasks", True, f"Task-based suggestions provided: {len(data['suggestions'])} suggestions")
+                else:
+                    self.log_test("ai_suggestions_with_tasks", False, "No suggestions returned", data)
+            else:
+                self.log_test("ai_suggestions_with_tasks", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_with_tasks", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_without_auth(self):
+        """Test AI suggestions without authentication"""
+        try:
+            # Clear session
+            self.session.cookies.clear()
+            
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 401:
+                self.log_test("ai_suggestions_without_auth", True, "Correctly rejected unauthenticated request")
+            else:
+                self.log_test("ai_suggestions_without_auth", False, f"Expected 401, got {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_without_auth", False, f"Exception: {str(e)}")
+    
+    def test_ai_summary_no_tasks(self):
+        """Test AI summary for user with no tasks"""
+        try:
+            # Create a new user for this test
+            new_user_email = f"summary_test_{uuid.uuid4().hex[:8]}@example.com"
+            
+            # Signup new user
+            signup_payload = {
+                "name": "Summary Test User",
+                "email": new_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_summary_no_tasks", False, "Failed to create test user")
+                return
+            
+            # Get summary
+            response = self.session.get(f"{BASE_URL}/ai/summary")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "summary" in data and "stats" in data:
+                    stats = data["stats"]
+                    if stats.get("total") == 0:
+                        self.log_test("ai_summary_no_tasks", True, f"Empty task summary provided: '{data['summary']}'")
+                    else:
+                        self.log_test("ai_summary_no_tasks", False, f"Expected 0 tasks, got {stats.get('total')}")
+                else:
+                    self.log_test("ai_summary_no_tasks", False, "Missing summary or stats", data)
+            else:
+                self.log_test("ai_summary_no_tasks", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_summary_no_tasks", False, f"Exception: {str(e)}")
+    
+    def test_ai_summary_with_tasks(self):
+        """Test AI summary for user with existing tasks"""
+        try:
+            # Login with main test user (who should have tasks from previous tests)
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("ai_summary_with_tasks", False, "Failed to login for test setup")
+                return
+            
+            # Get summary
+            response = self.session.get(f"{BASE_URL}/ai/summary")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "summary" in data and "stats" in data:
+                    stats = data["stats"]
+                    required_stats = ["total", "completed", "pending", "overdue", "high_priority"]
+                    missing_stats = [stat for stat in required_stats if stat not in stats]
+                    
+                    if not missing_stats:
+                        self.log_test("ai_summary_with_tasks", True, f"Task summary provided with all stats: {stats}")
+                    else:
+                        self.log_test("ai_summary_with_tasks", False, f"Missing stats: {missing_stats}")
+                else:
+                    self.log_test("ai_summary_with_tasks", False, "Missing summary or stats", data)
+            else:
+                self.log_test("ai_summary_with_tasks", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_summary_with_tasks", False, f"Exception: {str(e)}")
+    
+    def test_ai_summary_without_auth(self):
+        """Test AI summary without authentication"""
+        try:
+            # Clear session
+            self.session.cookies.clear()
+            
+            response = self.session.get(f"{BASE_URL}/ai/summary")
+            
+            if response.status_code == 401:
+                self.log_test("ai_summary_without_auth", True, "Correctly rejected unauthenticated request")
+            else:
+                self.log_test("ai_summary_without_auth", False, f"Expected 401, got {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_summary_without_auth", False, f"Exception: {str(e)}")
+    
+    def test_ai_parse_task_invalid_input(self):
+        """Test AI task parsing with invalid input"""
+        try:
+            # Login first
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("ai_parse_task_invalid_input", False, "Failed to login for test setup")
+                return
+            
+            # Test with empty text
+            payload = {
+                "text": ""
+            }
+            
+            response = self.session.post(f"{BASE_URL}/ai/parse-task", json=payload)
+            
+            if response.status_code == 422:  # Validation error
+                self.log_test("ai_parse_task_invalid_input", True, "Correctly rejected empty text")
+            elif response.status_code == 200:
+                # Some implementations might handle empty text gracefully
+                data = response.json()
+                if "success" in data and data["success"]:
+                    self.log_test("ai_parse_task_invalid_input", True, "Handled empty text gracefully")
+                else:
+                    self.log_test("ai_parse_task_invalid_input", False, "Unexpected response for empty text", data)
+            else:
+                self.log_test("ai_parse_task_invalid_input", False, f"Unexpected status {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_parse_task_invalid_input", False, f"Exception: {str(e)}")
+
     def run_all_tests(self):
-        """Run all authentication tests"""
-        print(f"🚀 Starting Authentication Test Suite for SmartTask AI")
+        """Run all authentication and AI tests"""
+        print(f"🚀 Starting SmartTask AI Test Suite (Auth + AI Features)")
         print(f"📍 Testing against: {BASE_URL}")
         print(f"👤 Test user email: {TEST_USER_EMAIL}")
         print("=" * 80)
@@ -621,6 +964,23 @@ class AuthTestSuite:
         self.test_dual_auth_system_independence()
         self.test_user_model_updates()
         self.test_session_management_consistency()
+        
+        print("\n" + "🤖 AI FEATURES TESTING" + "\n" + "=" * 80)
+        
+        # AI Features Testing
+        self.test_ai_parse_task_simple()
+        self.test_ai_parse_task_with_date()
+        self.test_ai_parse_task_with_priority()
+        self.test_ai_parse_task_without_auth()
+        self.test_ai_parse_task_invalid_input()
+        
+        self.test_ai_suggestions_no_tasks()
+        self.test_ai_suggestions_with_tasks()
+        self.test_ai_suggestions_without_auth()
+        
+        self.test_ai_summary_no_tasks()
+        self.test_ai_summary_with_tasks()
+        self.test_ai_summary_without_auth()
         
         # Summary
         self.print_summary()
