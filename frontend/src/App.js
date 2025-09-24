@@ -46,8 +46,9 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               } />
-            </Routes>
-            <Toaster />
+              </Routes>
+              <Toaster />
+            </NotificationProvider>
           </TaskProvider>
         </AuthProvider>
       </BrowserRouter>
