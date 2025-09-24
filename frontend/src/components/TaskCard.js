@@ -142,7 +142,7 @@ const TaskCard = ({ task, onEdit, compact = false }) => {
               className="mt-1"
             />
             <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-lg mb-1 ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+              <h3 className={`font-semibold text-base sm:text-lg mb-1 ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                 {task.title}
               </h3>
               {task.description && (
