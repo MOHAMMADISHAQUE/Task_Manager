@@ -66,6 +66,70 @@ const Dashboard = () => {
     handleEmergentCallback();
   }, [loginWithEmergent, toast]);
 
+  // Load AI suggestions on component mount
+  useEffect(() => {
+    if (tasks.length > 0) {
+      loadAISuggestions();
+    }
+  }, [tasks]);
+
+  const loadAISuggestions = async () => {
+    if (loadingSuggestions) return;
+    
+    setLoadingSuggestions(true);
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${BACKEND_URL}/api/ai/suggestions`, {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuggestions(data.suggestions || []);
+      }
+    } catch (error) {
+      console.error('Failed to load AI suggestions:', error);
+      // Fallback suggestions
+      setSuggestions([
+        "💡 Try organizing tasks by priority level",
+        "📅 Set realistic due dates for better planning",
+        "🎯 Break complex tasks into smaller steps"
+      ]);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const loadTaskSummary = async () => {
+    if (loadingSummary) return;
+    
+    setLoadingSummary(true);
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${BACKEND_URL}/api/ai/summary`, {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTaskSummary(data.summary || "");
+        toast({
+          title: "AI Summary Generated! 🤖",
+          description: "Check out your personalized task insights",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load task summary:', error);
+      setTaskSummary("📊 You're making great progress! Keep up the momentum! 💪");
+      toast({
+        title: "Summary Generated",
+        description: "Basic summary created (AI temporarily unavailable)",
+      });
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
   const stats = getTaskStats();
   const recentTasks = tasks.slice(0, 6);
   const upcomingTasks = tasks
