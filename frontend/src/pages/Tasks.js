@@ -161,7 +161,7 @@ const Tasks = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
           <div className="flex items-center gap-2 text-blue-600 mb-1">
             <Clock className="h-4 w-4" />
