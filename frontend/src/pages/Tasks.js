@@ -195,6 +195,41 @@ const Tasks = () => {
         </div>
       </div>
 
+      {/* Smart Input Box */}
+      <Card className="border-2 border-dashed border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-5 w-5 text-blue-600" />
+            <h3 className="font-semibold text-gray-900">Smart Task Creator</h3>
+            <Badge variant="secondary" className="text-xs">AI Powered</Badge>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Type naturally: "Call John tomorrow at 3 PM" or "Finish report next Friday"
+          </p>
+          <div className="flex gap-3">
+            <Input
+              placeholder="Remind me to..."
+              value={naturalLanguageText}
+              onChange={(e) => setNaturalLanguageText(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleNaturalLanguageTask()}
+              className="flex-1"
+              disabled={isCreatingTask}
+            />
+            <Button 
+              onClick={handleNaturalLanguageTask}
+              disabled={!naturalLanguageText.trim() || isCreatingTask}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isCreatingTask ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
