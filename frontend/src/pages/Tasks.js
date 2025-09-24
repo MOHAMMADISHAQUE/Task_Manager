@@ -16,8 +16,11 @@ import {
   MoreHorizontal,
   CheckSquare,
   AlertCircle,
-  Flag
+  Flag,
+  Sparkles,
+  Send
 } from "lucide-react";
+import { useToast } from "../hooks/use-toast";
 import { useTask } from "../contexts/TaskContext";
 import TaskCard from "../components/TaskCard";
 import TaskForm from "../components/TaskForm";
