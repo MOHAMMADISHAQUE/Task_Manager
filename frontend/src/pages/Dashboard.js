@@ -229,8 +229,8 @@ const Dashboard = () => {
             <Zap className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.inProgressTasks}</div>
-            <p className="text-xs text-gray-600">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.inProgressTasks}</div>
+            <p className="text-xs text-gray-600 leading-tight">
               Tasks currently being worked on
             </p>
           </CardContent>
