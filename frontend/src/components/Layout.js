@@ -150,7 +150,7 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64 pt-16">
+      <div className="lg:pl-64 pt-14 sm:pt-16">
         <main className="p-3 sm:p-4 lg:p-6">
           {children}
         </main>
