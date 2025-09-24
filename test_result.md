@@ -182,27 +182,33 @@ backend:
 
   - task: "Emergent Auth Login Initiation (GET /api/auth/emergent/login)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/routes/emergent_auth.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "✅ Implemented Emergent Auth login endpoint that redirects to Emergent Auth service"
+        - working: true
+          agent: "testing"
+          comment: "✅ All Emergent Auth login scenarios tested successfully: endpoint returns valid auth_url pointing to auth.emergentagent.com, accepts custom redirect_url parameter, properly constructs redirect URLs. Endpoint structure and validation working correctly."
 
   - task: "Emergent Auth Callback (POST /api/auth/emergent/callback)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/routes/emergent_auth.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "✅ Implemented Emergent Auth callback endpoint with account linking functionality for existing email users"
+        - working: true
+          agent: "testing"
+          comment: "✅ Emergent Auth callback endpoint tested successfully: correctly validates required session_id field (422 for missing), properly rejects invalid session IDs (400), endpoint structure and request validation working as expected. Account linking functionality implemented."
 
   - task: "Session Management & Security"
     implemented: true
