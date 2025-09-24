@@ -47,6 +47,50 @@ const Settings = () => {
   
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+  // Load user data on mount
+  useEffect(() => {
+    loadProfileData();
+    loadNotificationSettings();
+  }, []);
+
+  const loadProfileData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${BACKEND_URL}/api/settings/profile`, {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data.profile);
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadNotificationSettings = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/settings/notifications`, {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  };
+
   const handleNotificationChange = (key, value) => {
     setNotifications(prev => ({
       ...prev,
@@ -59,6 +103,73 @@ const Settings = () => {
       ...prev,
       [key]: value
     }));
+  };
+
+  const saveProfile = async () => {
+    try {
+      setSaving(true);
+      const response = await fetch(`${BACKEND_URL}/api/settings/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: profile.name,
+          role: profile.role,
+          timezone: profile.timezone,
+          language: profile.language
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been saved successfully",
+        });
+      } else {
+        throw new Error('Failed to save profile');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save profile changes",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveNotifications = async () => {
+    try {
+      setSaving(true);
+      const response = await fetch(`${BACKEND_URL}/api/settings/notifications`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(notifications)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Notification Settings Updated",
+          description: "Your notification preferences have been saved",
+        });
+      } else {
+        throw new Error('Failed to save notifications');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save notification settings",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
