@@ -1639,6 +1639,31 @@ class AuthTestSuite:
         self.test_ai_summary_with_tasks()
         self.test_ai_summary_without_auth()
         
+        print("\n" + "⚙️ SETTINGS API TESTING" + "\n" + "=" * 80)
+        
+        # Settings API Testing
+        self.test_get_profile_settings()
+        self.test_update_profile_settings()
+        self.test_get_notification_settings()
+        self.test_update_notification_settings()
+        self.test_change_password_email_user()
+        self.test_change_password_wrong_current()
+        self.test_get_security_info()
+        self.test_settings_without_auth()
+        
+        print("\n" + "🔔 NOTIFICATIONS API TESTING" + "\n" + "=" * 80)
+        
+        # Notifications API Testing
+        self.test_create_test_notifications()
+        self.test_get_notifications()
+        self.test_get_notifications_unread_only()
+        self.test_get_unread_count()
+        self.test_mark_notifications_read()
+        self.test_mark_all_notifications_read()
+        self.test_delete_notification()
+        self.test_delete_nonexistent_notification()
+        self.test_notifications_without_auth()
+        
         # Summary
         self.print_summary()
     
