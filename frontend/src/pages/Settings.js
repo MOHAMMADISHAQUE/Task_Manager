@@ -441,16 +441,49 @@ const Settings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-4">
-            <Button variant="outline" className="justify-start">
-              Change Password
-            </Button>
-            <Button variant="outline" className="justify-start">
+            {profile.auth_provider === 'email' ? (
+              <ChangePasswordDialog>
+                <Button variant="outline" className="justify-start w-full sm:w-auto">
+                  Change Password
+                </Button>
+              </ChangePasswordDialog>
+            ) : (
+              <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg">
+                Password change is not available for Google authentication users
+              </div>
+            )}
+            
+            <Button 
+              variant="outline" 
+              className="justify-start w-full sm:w-auto"
+              onClick={() => toast({
+                title: "Coming Soon",
+                description: "Two-factor authentication will be available soon",
+              })}
+            >
               Two-Factor Authentication
             </Button>
-            <Button variant="outline" className="justify-start">
+            
+            <Button 
+              variant="outline" 
+              className="justify-start w-full sm:w-auto"
+              onClick={() => toast({
+                title: "Login History",
+                description: "You can view your recent login activity",
+              })}
+            >
               Login History
             </Button>
-            <Button variant="outline" className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50">
+            
+            <Button 
+              variant="outline" 
+              className="justify-start w-full sm:w-auto text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => toast({
+                title: "Account Deletion",
+                description: "Please contact support to delete your account",
+                variant: "destructive",
+              })}
+            >
               Delete Account
             </Button>
           </div>
