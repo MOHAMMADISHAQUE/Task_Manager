@@ -22,22 +22,30 @@ import {
 } from "lucide-react";
 
 const Settings = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
     desktop: false,
-    taskReminders: true,
-    projectUpdates: true,
-    weeklyDigest: false
+    task_reminders: true,
+    project_updates: true,
+    weekly_digest: false
   });
 
   const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Project Manager",
-    timezone: "UTC-8",
+    name: "",
+    email: "",
+    role: "",
+    timezone: "UTC+0",
     language: "English"
   });
+
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   const handleNotificationChange = (key, value) => {
     setNotifications(prev => ({
