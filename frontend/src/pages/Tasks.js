@@ -135,11 +135,13 @@ const Tasks = () => {
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Tasks</h1>
+        <div className="transform hover:scale-105 transition-transform duration-300">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            Tasks 📋
+          </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Manage and track all your tasks in one place.</p>
         </div>
         
