@@ -45,12 +45,14 @@ const Projects = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-600 mt-1">Manage your projects and track their progress.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <div className="transform hover:scale-105 transition-transform duration-300">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Projects 📁
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your projects and track their progress.</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="mr-2 h-4 w-4" />
