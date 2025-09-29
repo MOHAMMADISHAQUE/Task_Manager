@@ -106,7 +106,7 @@ const Layout = ({ children }) => {
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:pt-16 z-30">
         <div className="flex flex-col flex-1 min-h-0 bg-white border-r border-gray-200">
-          <nav className="flex-1 px-4 py-4 space-y-1">
+          <nav className="px-4 py-4 space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
@@ -129,6 +129,67 @@ const Layout = ({ children }) => {
               );
             })}
           </nav>
+          
+          {/* Quick Stats Widget */}
+          <div className="flex-1 px-4 pb-4">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-4 border border-blue-100">
+              <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Quick Stats
+              </h3>
+              
+              <div className="space-y-3">
+                {/* Today's Tasks */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                    <span className="text-xs text-gray-600">Today's Tasks</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-800">8</span>
+                </div>
+                
+                {/* Overdue Items */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-red-400 rounded-full mr-2"></div>
+                    <span className="text-xs text-gray-600">Overdue</span>
+                  </div>
+                  <span className="text-sm font-semibold text-red-600">2</span>
+                </div>
+                
+                {/* Completion Streak */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
+                    <span className="text-xs text-gray-600">Streak</span>
+                  </div>
+                  <span className="text-sm font-semibold text-orange-600">5 days</span>
+                </div>
+                
+                {/* Weekly Score */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                    <span className="text-xs text-gray-600">Weekly Score</span>
+                  </div>
+                  <span className="text-sm font-semibold text-purple-600">92%</span>
+                </div>
+              </div>
+              
+              {/* Mini Progress Bar */}
+              <div className="mt-3 pt-3 border-t border-blue-200">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500">Week Progress</span>
+                  <span className="text-xs font-medium text-gray-700">6/7 days</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-1.5">
+                  <div className="bg-blue-600 h-1.5 rounded-full" style={{width: '86%'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
