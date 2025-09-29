@@ -435,7 +435,7 @@ const Settings = () => {
       </Card>
 
       {/* Security Settings */}
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01] animate-fade-in-up animation-delay-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
