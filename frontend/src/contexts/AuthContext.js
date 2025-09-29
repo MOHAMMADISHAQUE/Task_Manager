@@ -20,20 +20,50 @@ export const AuthProvider = ({ children }) => {
 
   // Check for existing session on app load
   useEffect(() => {
-    checkExistingSession();
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn('Auth check taking too long, stopping loading state');
+        setLoading(false);
+        setUser(null);
+      }
+    }, 8000); // 8 second absolute maximum
+
+    checkExistingSession().finally(() => {
+      clearTimeout(timeoutId);
+    });
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const checkExistingSession = async () => {
+    let completed = false;
+    
     try {
-      const response = await axios.get(`${API}/auth/me`, {
-        withCredentials: true
+      // Race between the request and a timeout
+      const authCheck = axios.get(`${API}/auth/me`, {
+        withCredentials: true,
+        timeout: 5000 // 5 second request timeout
       });
-      setUser(response.data);
+      
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 6000);
+      });
+      
+      const response = await Promise.race([authCheck, timeoutPromise]);
+      
+      if (response && response.data) {
+        setUser(response.data);
+        console.log('Existing session found:', response.data.email);
+      }
     } catch (error) {
-      // No valid session
-      console.log('No existing session');
+      // Handle all error types gracefully
+      console.log('No valid session or auth check failed:', error.message);
+      setUser(null);
     } finally {
-      setLoading(false);
+      if (!completed) {
+        completed = true;
+        setLoading(false);
+      }
     }
   };
 

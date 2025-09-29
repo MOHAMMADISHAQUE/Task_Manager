@@ -422,21 +422,36 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
             """
             
             user_message = UserMessage(text=prompt)
-            response = await chat.send_message(user_message)
             
+            # Set a timeout for the AI response to prevent long waits
+            import asyncio
             try:
-                # Parse AI response
-                suggestions = json.loads(response.strip())
-                if isinstance(suggestions, list) and len(suggestions) >= 3:
-                    logger.info(f"AI generated intelligent suggestions: {suggestions}")
-                    return TaskSuggestionResponse(suggestions=suggestions[:4])
-                else:
-                    logger.warning(f"AI returned invalid format: {suggestions}")
-            except json.JSONDecodeError as e:
-                logger.error(f"AI returned malformed JSON: {response[:200]} | Error: {e}")
+                response = await asyncio.wait_for(
+                    chat.send_message(user_message), 
+                    timeout=30.0  # 30 second timeout
+                )
+            except asyncio.TimeoutError:
+                logger.warning("AI response timed out after 30 seconds, using intelligent fallback")
+                response = None
+            
+            if response:
+                try:
+                    # Parse AI response with timeout
+                    suggestions = json.loads(response.strip())
+                    if isinstance(suggestions, list) and len(suggestions) >= 3:
+                        logger.info(f"AI generated intelligent suggestions: {suggestions}")
+                        return TaskSuggestionResponse(suggestions=suggestions[:4])
+                    else:
+                        logger.warning(f"AI returned invalid format: {suggestions}")
+                        raise ValueError("Invalid AI response format")
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.error(f"AI returned malformed response: {response[:200]} | Error: {e}")
+                    # Fall through to intelligent fallback
             
             # If AI fails, create intelligent fallback based on actual content
             intelligent_suggestions = []
+            
+            logger.info(f"Creating intelligent fallback suggestions for {len(tasks)} tasks, {len(projects)} projects")
             
             # Address urgent items first with specific advice
             if urgent_items:
@@ -445,51 +460,79 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
                 
                 if overdue_count > 0:
                     overdue_task = urgent_items[0].replace("OVERDUE: ", "")
-                    intelligent_suggestions.append(f"🚨 Tackle overdue '{overdue_task[:30]}...' - break into 25min focused sessions")
+                    intelligent_suggestions.append(f"🚨 Priority: Complete overdue '{overdue_task[:40]}...' - break into 25min sessions")
                 
                 if today_count > 0:
                     today_task = [item for item in urgent_items if "TODAY" in item][0].replace("TODAY: ", "")
-                    intelligent_suggestions.append(f"⏰ Priority: '{today_task[:30]}...' - schedule specific time blocks today")
+                    intelligent_suggestions.append(f"⏰ Focus: '{today_task[:40]}...' is due today - schedule dedicated time")
             
-            # Domain-specific suggestions
+            # Domain-specific suggestions with external resources
             if 'marketing' in task_domains:
-                intelligent_suggestions.append("📈 Marketing tasks detected - use Hootsuite.com for social media scheduling")
-            elif 'development' in task_domains:
-                intelligent_suggestions.append("💻 Coding projects found - try GitHub.com for version control and collaboration")
+                intelligent_suggestions.append("📈 Marketing tasks detected - try Canva.com for design templates and Buffer.com for scheduling")
+            elif 'development' in task_domains or 'coding' in task_domains:
+                intelligent_suggestions.append("💻 Development work found - use GitHub.com for version control and Stack Overflow for help")
             elif 'design' in task_domains:
-                intelligent_suggestions.append("🎨 Design work detected - check Figma.com for collaborative design tools")
-            elif 'education' in task_domains or 'research' in task_domains:
-                intelligent_suggestions.append("📚 Learning tasks found - use Khan Academy or Coursera for structured courses")
+                intelligent_suggestions.append("🎨 Design tasks detected - check Figma.com for collaboration and Dribbble.com for inspiration")
+            elif 'finance' in task_domains or 'budget' in task_domains:
+                intelligent_suggestions.append("💰 Financial tasks found - use Excel templates from Office.com or QuickBooks.com")
+            elif 'education' in task_domains or 'learning' in task_domains:
+                intelligent_suggestions.append("📚 Learning goals detected - try Khan Academy, Coursera, or YouTube tutorials")
+            elif 'business' in task_domains:
+                intelligent_suggestions.append("🏢 Business tasks found - organize with Notion.so or track progress in Trello.com")
             
-            # Project-specific advice
+            # Analyze task patterns for specific suggestions
+            long_tasks = [t for t in tasks if len(t.get('title', '')) > 30 or len(t.get('description', '')) > 50]
+            if long_tasks:
+                sample_task = long_tasks[0].get('title', 'complex task')
+                intelligent_suggestions.append(f"📝 Break down '{sample_task[:30]}...' into smaller, manageable subtasks")
+            
+            # Project-specific advice based on actual data
             projects_without_tasks = [p for p in projects if not any(t.get('project_id') == p.get('id') for t in tasks)]
-            if projects_without_tasks:
-                project_name = projects_without_tasks[0].get('name', 'your project')
-                intelligent_suggestions.append(f"📂 Add specific tasks to '{project_name[:25]}...' project for better organization")
+            if projects_without_tasks and len(projects_without_tasks) <= 3:
+                project_names = ', '.join([p.get('name', 'Unnamed')[:20] for p in projects_without_tasks[:2]])
+                intelligent_suggestions.append(f"📂 Add specific tasks to '{project_names}' project{'s' if len(projects_without_tasks) > 1 else ''}")
             
-            # High-level productivity based on their patterns
-            high_priority_tasks = [t for t in tasks if t.get('priority') == 'high' and t.get('status') != 'completed']
-            if len(high_priority_tasks) > 3:
-                intelligent_suggestions.append("⚡ Too many high-priority items - use Eisenhower Matrix: urgent vs important")
-            elif len(tasks) > 10 and not projects:
-                intelligent_suggestions.append("📊 Consider grouping your tasks into projects - try GTD methodology")
-            else:
-                completed_count = len([t for t in tasks if t.get('status') == 'completed'])
-                if completed_count > 0:
-                    intelligent_suggestions.append(f"🎉 Great momentum with {completed_count} completed tasks - maintain your rhythm!")
+            # Progress-based encouragement with specific numbers
+            completed_count = len([t for t in tasks if t.get('status') == 'completed'])
+            pending_count = len([t for t in tasks if t.get('status') != 'completed'])
             
-            # Ensure we have 4 suggestions
-            while len(intelligent_suggestions) < 4:
-                fallback_suggestions = [
-                    "🎯 Use Pomodoro Technique (25min focus) - try Forest app for focus tracking",
-                    "📅 Time-block your calendar - Google Calendar has built-in time insights",
-                    "🔄 Review and adjust priorities weekly - Sunday planning sessions work well",
-                    "📝 Capture ideas in a note-taking app - Notion or Obsidian for knowledge management"
+            if completed_count > 0 and len(tasks) > 0:
+                completion_rate = (completed_count / len(tasks)) * 100
+                if completion_rate >= 60:
+                    intelligent_suggestions.append(f"🎉 Excellent progress! {completion_rate:.0f}% completion rate - maintain this momentum")
+                elif completed_count >= 3:
+                    intelligent_suggestions.append(f"💪 You've completed {completed_count} tasks - build on that success with the next one")
+            
+            # Productivity suggestions based on actual task load
+            if pending_count > 8:
+                intelligent_suggestions.append("⚡ High task load detected - try the Eisenhower Matrix: focus on urgent + important first")
+            elif len(tasks) > 0 and not projects:
+                intelligent_suggestions.append("📊 Consider organizing your tasks into projects for better structure and tracking")
+            
+            # Ensure we have exactly 4 suggestions with helpful external resources
+            if len(intelligent_suggestions) < 4:
+                additional_suggestions = [
+                    "🎯 Use Pomodoro Technique (25min focus blocks) - try Forest app to stay focused",
+                    "📅 Time-block your calendar with specific task slots - Google Calendar works great",
+                    "🔄 Weekly review every Sunday - plan upcoming tasks and celebrate wins",
+                    "📝 Capture all ideas in a note-taking app - try Notion.so or Obsidian for organization",
+                    "⚡ Apply the 2-minute rule - do quick tasks immediately to clear your list",
+                    "🚀 Batch similar tasks together for maximum efficiency and flow state"
                 ]
-                for suggestion in fallback_suggestions:
-                    if suggestion not in intelligent_suggestions and len(intelligent_suggestions) < 4:
-                        intelligent_suggestions.append(suggestion)
+                
+                # Add unique suggestions that aren't already included
+                for suggestion in additional_suggestions:
+                    if len(intelligent_suggestions) < 4:
+                        # Check if similar suggestion already exists
+                        suggestion_key_words = suggestion.lower().split()[:3]
+                        is_duplicate = any(
+                            any(word in existing.lower() for word in suggestion_key_words)
+                            for existing in intelligent_suggestions
+                        )
+                        if not is_duplicate:
+                            intelligent_suggestions.append(suggestion)
             
+            logger.info(f"Generated {len(intelligent_suggestions)} intelligent fallback suggestions")
             return TaskSuggestionResponse(suggestions=intelligent_suggestions[:4])
             
         except Exception as e:

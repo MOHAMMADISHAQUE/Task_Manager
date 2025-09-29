@@ -46,21 +46,32 @@ const Dashboard = () => {
     setLoadingSuggestions(true);
     try {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      
+      // Add timeout to prevent infinite loading
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
       const response = await fetch(`${BACKEND_URL}/api/ai/suggestions`, {
-        credentials: 'include'
+        credentials: 'include',
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data.suggestions || []);
+      } else {
+        throw new Error(`API responded with status: ${response.status}`);
       }
     } catch (error) {
       console.error('Failed to load AI suggestions:', error);
-      // Fallback suggestions
+      // Provide helpful fallback suggestions
       setSuggestions([
-        "💡 Try organizing tasks by priority level",
-        "📅 Set realistic due dates for better planning",
-        "🎯 Break complex tasks into smaller steps"
+        "🔄 AI suggestions temporarily unavailable - refresh to try again",
+        "📋 Review your tasks and prioritize the most important ones",
+        "⏰ Check for any overdue or urgent items that need attention",
+        "📊 Consider organizing related tasks into projects"
       ]);
     } finally {
       setLoadingSuggestions(false);
