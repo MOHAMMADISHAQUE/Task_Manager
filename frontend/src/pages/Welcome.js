@@ -10,10 +10,15 @@ import { useToast } from '../hooks/use-toast';
 const Welcome = () => {
   const [workspaceType, setWorkspaceType] = useState('sample');
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSetupWorkspace = async () => {
     setLoading(true);
