@@ -147,7 +147,7 @@ const Layout = ({ children }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-2 space-y-1">
+          <nav className="flex-1 px-4 py-2 space-y-0.5">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
