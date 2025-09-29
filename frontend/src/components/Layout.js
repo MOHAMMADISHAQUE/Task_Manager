@@ -122,7 +122,7 @@ const Layout = ({ children }) => {
                   `}
                 >
                   <Icon className={`mr-3 h-5 w-5 transition-transform duration-200 ${
-                    isActive(item.href) ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700'
+                    isActive(item.href) ? 'text-blue-600' : 'text-gray-500'
                   }`} />
                   <span className="font-medium">{item.name}</span>
                 </Link>
@@ -164,7 +164,7 @@ const Layout = ({ children }) => {
                   `}
                 >
                   <Icon className={`mr-3 h-5 w-5 transition-transform duration-200 ${
-                    isActive(item.href) ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700'
+                    isActive(item.href) ? 'text-blue-600' : 'text-gray-500'
                   }`} />
                   <span className="font-medium">{item.name}</span>
                 </Link>
