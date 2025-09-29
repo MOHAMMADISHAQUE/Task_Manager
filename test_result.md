@@ -599,7 +599,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Desktop Navigation Fix - Overlay Issues"
+    - "Email Signup Error Message Display"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
