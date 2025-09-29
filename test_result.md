@@ -199,7 +199,7 @@ backend:
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the new Settings and Notifications functionality for SmartTask AI: Profile Settings, Notification Settings, Password Change, Security Info, and complete Notifications CRUD operations"
+user_problem_statement: "Test the fixed Emergent Auth (Google signup/login) flow for SmartTask AI - User reports that 'sign up with google takes me back to the sign in page' instead of completing signup. I've implemented a fix with a dedicated auth callback page."
 
 backend:
   - task: "User Registration (POST /api/auth/signup)"
