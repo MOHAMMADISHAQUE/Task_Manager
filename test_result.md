@@ -104,6 +104,18 @@
           agent: "testing"
           comment: "✅ Emergent Auth integration tested successfully: loginWithEmergent function properly calls POST /api/auth/emergent/callback with session_id, handles invalid session IDs with 400 error response and 'Invalid session ID' message, error handling works correctly with proper toast notifications, and authentication state management integrated properly with existing auth flow."
 
+  - task: "Email Signup Error Message Display"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/pages/Signup.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL UX ISSUE IDENTIFIED: Frontend signup form is not displaying error messages to users when 400 Bad Request errors occur. Users receive no feedback when signup fails due to duplicate email, invalid email format, or missing fields. The backend correctly returns 400 errors with detailed error messages (e.g., 'User with this email already exists'), but the frontend AuthContext.signup() function only shows generic 'Signup failed' message without the specific backend error details. This creates poor UX where users think the system is broken when it's actually working correctly. The signup function needs to extract and display the specific error message from error.response?.data?.detail or error.response?.data?.message."
+
 backend:
 ##   - task: "Task name"
 ##     implemented: true
