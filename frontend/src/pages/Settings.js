@@ -239,9 +239,9 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fade-in-up">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 px-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div className="transform hover:scale-105 transition-transform duration-300">
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             {t('settings.title')} ⚙️
