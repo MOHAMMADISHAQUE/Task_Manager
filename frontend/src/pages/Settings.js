@@ -429,61 +429,6 @@ const Settings = () => {
         </CardContent>
       </Card>
 
-      {/* Appearance Settings */}
-      <Card className="hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01] animate-fade-in-up animation-delay-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5" />
-            {t('settings.appearance')}
-          </CardTitle>
-          <CardDescription>Customize your interface preferences</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="theme" className="text-sm font-medium">
-                {t('settings.theme')}
-              </Label>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={theme === 'light' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTheme('light')}
-                  className="px-3 py-1"
-                >
-                  ☀️ Light
-                </Button>
-                <Button
-                  variant={theme === 'dark' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTheme('dark')}
-                  className="px-3 py-1"
-                >
-                  🌙 Dark
-                </Button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="language" className="text-sm font-medium">
-                {t('settings.language')}
-              </Label>
-              <Select value={currentLanguage} onValueChange={changeLanguage}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableLanguages.map((lang) => (
-                    <SelectItem key={lang.code} value={lang.code}>
-                      {lang.flag} {lang.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Security Settings */}
       <Card className="hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01] animate-fade-in-up animation-delay-300">
         <CardHeader>
