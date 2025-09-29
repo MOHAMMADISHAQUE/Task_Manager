@@ -121,7 +121,7 @@ const Layout = ({ children }) => {
                     }
                   `}
                 >
-                  <Icon className={`mr-3 h-5 w-5 transition-transform duration-200 ${
+                  <Icon className={`mr-3 h-5 w-5 ${
                     isActive(item.href) ? 'text-blue-600' : 'text-gray-500'
                   }`} />
                   <span className="font-medium">{item.name}</span>
@@ -163,7 +163,7 @@ const Layout = ({ children }) => {
                     }
                   `}
                 >
-                  <Icon className={`mr-3 h-5 w-5 transition-transform duration-200 ${
+                  <Icon className={`mr-3 h-5 w-5 ${
                     isActive(item.href) ? 'text-blue-600' : 'text-gray-500'
                   }`} />
                   <span className="font-medium">{item.name}</span>
