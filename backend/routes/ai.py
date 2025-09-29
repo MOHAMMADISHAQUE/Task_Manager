@@ -340,9 +340,25 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
                     f"   Progress: {progress}"
                 )
             
+            # Extract domains and important tasks for resource searching
+            important_tasks = []
+            for task in tasks[:5]:  # Top 5 tasks for resource search
+                if task.get('priority') in ['high', 'medium'] and task.get('status') != 'completed':
+                    important_tasks.append(task.get('title', ''))
+            
+            # Find external resources
+            external_resources = await find_external_resources(task_domains, important_tasks)
+            
+            # Enhanced prompt with web resources
+            resource_context = ""
+            if external_resources:
+                resource_context = "AVAILABLE EXTERNAL RESOURCES:\n"
+                for key, resource in external_resources.items():
+                    resource_context += f"- {resource['title']}: {resource['url']}\n"
+            
             # Create intelligent analysis prompt
             prompt = f"""
-            You are an AI productivity assistant with access to web resources. Analyze this user's specific tasks and projects to provide 4 highly intelligent, personalized suggestions.
+            You are an AI productivity assistant analyzing specific task and project content. Provide 4 highly intelligent, personalized suggestions.
 
             USER'S CURRENT WORK:
             {chr(10).join(detailed_context)}
@@ -352,25 +368,25 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
 
             DOMAINS DETECTED: {', '.join(task_domains) if task_domains else 'General productivity'}
 
-            REQUIREMENTS:
-            1. Analyze the ACTUAL CONTENT of tasks/projects, not just counts
-            2. Address urgent items with specific advice
-            3. Provide domain-specific suggestions based on task content
-            4. Include helpful external resources (websites, tools, documents) when relevant
-            5. Each suggestion must be actionable and specific to their situation
+            {resource_context}
 
-            FORMAT REQUIREMENTS:
-            - Each suggestion starts with relevant emoji
-            - 80-120 characters per suggestion
-            - Include external resource links when applicable
-            - Be specific about their actual tasks, not generic advice
+            REQUIREMENTS FOR SUGGESTIONS:
+            1. Analyze ACTUAL task/project content, not just counts or generic advice
+            2. Address urgent items first with specific, actionable steps
+            3. Provide domain-specific suggestions based on the task content
+            4. Include relevant external resources, tools, or websites when helpful
+            5. Reference specific task names from their list when giving advice
+            6. Each suggestion must be immediately actionable
 
-            EXAMPLE GOOD SUGGESTIONS:
-            "🚨 Focus on overdue 'Marketing Campaign' - use Canva templates: canva.com/templates"
-            "📊 For 'Python Learning' project - start with Python.org official tutorial"
-            "⚡ Break 'Website Design' into: wireframe → mockup → code → test phases"
-            
-            Return ONLY a JSON array of exactly 4 suggestion strings.
+            SUGGESTION QUALITY EXAMPLES:
+            ✅ GOOD: "🚨 For overdue 'Marketing Campaign' task - create content calendar with Buffer.com"
+            ✅ GOOD: "📊 'Python Learning' project needs structure - start with Python.org's beginner tutorial"  
+            ✅ GOOD: "⚡ Break 'Website Design' into: research → wireframe → mockup → code phases"
+            ❌ AVOID: "Try organizing tasks by priority level" (too generic)
+            ❌ AVOID: "Set realistic due dates" (doesn't reference their actual work)
+
+            FORMAT: Return ONLY a JSON array of exactly 4 suggestion strings.
+            Each suggestion should be 80-130 characters, start with emoji, be specific to their tasks.
             """
             
             user_message = UserMessage(text=prompt)
