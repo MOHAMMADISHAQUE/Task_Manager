@@ -25,9 +25,11 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <AuthProvider>
-          <TaskProvider>
-            <NotificationProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <TaskProvider>
+                <NotificationProvider>
               <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />
