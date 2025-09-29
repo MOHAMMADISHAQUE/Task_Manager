@@ -9,8 +9,86 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Sample data to make the app look appealing
-def generate_sample_data(user_id: str):
+# Sample data pools for personalization
+PROJECT_TEMPLATES = [
+    # Tech/Development Projects
+    {
+        "name": "Website Redesign", 
+        "description": "Complete overhaul of company website with modern design and improved UX",
+        "category": "tech"
+    },
+    {
+        "name": "Mobile App Development", 
+        "description": "Cross-platform mobile application for task management and productivity",
+        "category": "tech"
+    },
+    {
+        "name": "API Documentation", 
+        "description": "Comprehensive documentation for all API endpoints and developer resources",
+        "category": "tech"
+    },
+    {
+        "name": "E-commerce Integration", 
+        "description": "Integrate payment processing and inventory management systems",
+        "category": "tech"
+    },
+    # Business/Marketing Projects
+    {
+        "name": "Marketing Campaign Q4", 
+        "description": "Launch comprehensive marketing campaign for Q4 product releases",
+        "category": "business"
+    },
+    {
+        "name": "Brand Identity Refresh", 
+        "description": "Update brand guidelines, logos, and marketing materials",
+        "category": "business"
+    },
+    {
+        "name": "Customer Onboarding", 
+        "description": "Improve customer onboarding process and reduce churn rate",
+        "category": "business"
+    },
+    # Personal Projects
+    {
+        "name": "Home Office Setup", 
+        "description": "Design and organize productive home office workspace",
+        "category": "personal"
+    },
+    {
+        "name": "Fitness Challenge", 
+        "description": "30-day fitness and wellness improvement program",
+        "category": "personal"
+    },
+    {
+        "name": "Skill Development", 
+        "description": "Learn new professional skills and earn certifications",
+        "category": "personal"
+    }
+]
+
+TASK_TEMPLATES = [
+    # Tech Tasks
+    {"title": "Design new landing page", "description": "Create a modern, responsive landing page with improved conversion rates", "category": "tech", "priority": "high"},
+    {"title": "Implement user authentication", "description": "Set up secure user authentication system with JWT tokens", "category": "tech", "priority": "high"},
+    {"title": "Database optimization", "description": "Optimize database queries and improve performance", "category": "tech", "priority": "medium"},
+    {"title": "Code review and testing", "description": "Comprehensive code review and unit testing", "category": "tech", "priority": "high"},
+    {"title": "API rate limiting", "description": "Implement rate limiting for API endpoints", "category": "tech", "priority": "high"},
+    {"title": "Security audit", "description": "Complete security audit using best practices", "category": "tech", "priority": "high"},
+    
+    # Business Tasks
+    {"title": "Social media content calendar", "description": "Develop content calendar for social media posts", "category": "business", "priority": "medium"},
+    {"title": "Client presentation preparation", "description": "Prepare presentation materials for client meeting", "category": "business", "priority": "high"},
+    {"title": "Market research analysis", "description": "Analyze competitor strategies and market trends", "category": "business", "priority": "medium"},
+    {"title": "Budget planning review", "description": "Review and optimize quarterly budget allocation", "category": "business", "priority": "medium"},
+    
+    # Personal Tasks
+    {"title": "Organize workspace", "description": "Declutter and organize home office for better productivity", "category": "personal", "priority": "low"},
+    {"title": "Exercise routine", "description": "Establish consistent daily exercise routine", "category": "personal", "priority": "medium"},
+    {"title": "Read industry articles", "description": "Stay updated with latest industry trends and news", "category": "personal", "priority": "low"},
+    {"title": "Network with colleagues", "description": "Schedule coffee chats with industry contacts", "category": "personal", "priority": "low"},
+]
+
+def generate_personalized_sample_data(user_id: str, user_name: str = None):
     """Generate sample tasks and projects for a user."""
     
     # Sample projects
