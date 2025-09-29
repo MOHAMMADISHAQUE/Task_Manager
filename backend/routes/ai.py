@@ -193,139 +193,48 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
     
     @router.get("/suggestions", response_model=TaskSuggestionResponse)
     async def get_task_suggestions(req: Request):
-        """Generate AI-powered task suggestions based on user's current tasks and projects"""
+        """Generate truly intelligent AI-powered suggestions based on user's actual tasks and projects content"""
         
         # Get current user
         user = await get_current_user(req, db)
         
-        # Get user's tasks and projects
+        # Get user's tasks and projects with full details
         tasks = await db.tasks.find({"user_id": user["id"]}).to_list(length=None)
         projects = await db.projects.find({"user_id": user["id"]}).to_list(length=None)
         
         if not tasks and not projects:
             return TaskSuggestionResponse(suggestions=[
-                "🚀 Welcome! Start by creating your first task or project",
-                "💡 Try using natural language: 'Remind me to call mom tomorrow'",
-                "📊 Create a project to organize related tasks together",
-                "📅 Set due dates to stay organized and on track"
+                "🚀 Welcome! Start by creating your first task - describe what you want to accomplish",
+                "💡 Try: 'Plan marketing campaign for Q4' or 'Learn Python programming'",
+                "📊 Create a project to group related tasks together",
+                "🎯 I'll analyze your tasks and provide intelligent, personalized suggestions"
             ])
         
         try:
             chat = get_llm_chat()
             
-            if chat:
-                # Prepare comprehensive data for AI
-                context_data = []
-                
-                # Add project context
-                for project in projects:
-                    project_tasks = [t for t in tasks if t.get('project_id') == project['id']]
-                    completed_tasks = len([t for t in project_tasks if t.get('status') == 'completed'])
-                    total_tasks = len(project_tasks)
-                    progress = f"{completed_tasks}/{total_tasks} tasks completed" if total_tasks > 0 else "no tasks yet"
-                    
-                    context_data.append(f"📂 Project '{project['name']}' ({progress}) - {project.get('description', '')}".strip())
-                
-                # Add task context - focus on recent and important ones
-                task_summaries = []
-                overdue_tasks = []
-                today_tasks = []
-                high_priority_tasks = []
-                
-                for task in tasks:
-                    status_emoji = "✅" if task["status"] == "completed" else "📋"
-                    priority_text = f"({task.get('priority', 'medium')} priority)"
-                    
-                    # Check if task is overdue
-                    if task.get('due_date') and task.get('status') != 'completed':
-                        try:
-                            due_date = task['due_date']
-                            if isinstance(due_date, str):
-                                due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
-                            elif isinstance(due_date, datetime):
-                                if due_date.tzinfo is None:
-                                    due_date = due_date.replace(tzinfo=timezone.utc)
-                            
-                            now = datetime.now(timezone.utc)
-                            if due_date < now:
-                                overdue_tasks.append(task['title'])
-                            elif due_date.date() == now.date():
-                                today_tasks.append(task['title'])
-                        except (ValueError, TypeError):
-                            pass
-                    
-                    if task.get('priority') == 'high' and task.get('status') != 'completed':
-                        high_priority_tasks.append(task['title'])
-                
-                # Create intelligent context summary
-                context_summary = []
-                if len(projects) > 0:
-                    context_summary.append(f"📊 {len(projects)} active projects")
-                if len(overdue_tasks) > 0:
-                    context_summary.append(f"🚨 {len(overdue_tasks)} overdue tasks: {', '.join(overdue_tasks[:3])}")
-                if len(today_tasks) > 0:
-                    context_summary.append(f"⏰ {len(today_tasks)} tasks due today: {', '.join(today_tasks[:3])}")
-                if len(high_priority_tasks) > 0:
-                    context_summary.append(f"⚡ {len(high_priority_tasks)} high priority tasks: {', '.join(high_priority_tasks[:3])}")
-                
-                completed_count = len([t for t in tasks if t.get('status') == 'completed'])
-                total_tasks = len(tasks)
-                if total_tasks > 0:
-                    completion_rate = (completed_count / total_tasks) * 100
-                    context_summary.append(f"📈 {completion_rate:.0f}% completion rate ({completed_count}/{total_tasks})")
-                
-                prompt = f"""
-                Based on this user's current work situation, provide 3-4 personalized, actionable suggestions:
-                
-                PROJECTS: {len(projects)} projects
-                {chr(10).join(context_data) if context_data else "No projects yet"}
-                
-                TASK SITUATION:
-                {chr(10).join(context_summary) if context_summary else "No tasks yet"}
-                
-                Generate intelligent suggestions that:
-                - Address urgent issues (overdue/today's tasks) first
-                - Help with project organization if they have projects
-                - Suggest productivity improvements based on their patterns
-                - Encourage progress and next steps
-                
-                Each suggestion should be:
-                - Specific to their actual situation
-                - Actionable (they can do it now)
-                - Under 80 characters
-                - Start with a relevant emoji
-                
-                Respond with exactly 3-4 suggestions as a JSON array of strings.
-                """
-                
-                user_message = UserMessage(text=prompt)
-                response = await chat.send_message(user_message)
-                
-                try:
-                    suggestions = json.loads(response.strip())
-                    if isinstance(suggestions, list) and len(suggestions) >= 3:
-                        return TaskSuggestionResponse(suggestions=suggestions[:4])
-                except json.JSONDecodeError:
-                    logger.warning("AI returned malformed JSON, falling back to intelligent analysis")
+            if not chat:
+                logger.error("GPT-5 chat not available - check EMERGENT_LLM_KEY")
+                return TaskSuggestionResponse(suggestions=[
+                    "🤖 AI suggestions temporarily unavailable - check system configuration",
+                    "📝 Meanwhile, try organizing tasks by priority: high, medium, low",
+                    "⏰ Set specific deadlines for time-sensitive tasks",
+                    "🎯 Break large tasks into smaller, actionable steps"
+                ])
             
-            # Enhanced intelligent fallback suggestions based on actual user data
-            suggestions = []
+            # Prepare detailed context with actual task/project content
+            detailed_context = []
+            urgent_items = []
+            task_domains = set()
             
-            # Analyze current situation
-            overdue_count = 0
-            today_count = 0
-            high_priority_count = 0
-            completed_count = 0
-            
+            # Analyze tasks with content
             for task in tasks:
-                if task.get('status') == 'completed':
-                    completed_count += 1
-                    continue
+                status_emoji = "✅" if task.get("status") == "completed" else "🔄"
+                priority = task.get('priority', 'medium')
+                due_date_str = ""
                 
-                if task.get('priority') == 'high':
-                    high_priority_count += 1
-                
-                if task.get('due_date'):
+                # Check urgency
+                if task.get('due_date') and task.get('status') != 'completed':
                     try:
                         due_date = task['due_date']
                         if isinstance(due_date, str):
@@ -336,77 +245,169 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
                         
                         now = datetime.now(timezone.utc)
                         if due_date < now:
-                            overdue_count += 1
+                            urgent_items.append(f"OVERDUE: {task['title']}")
+                            due_date_str = " (OVERDUE)"
                         elif due_date.date() == now.date():
-                            today_count += 1
+                            urgent_items.append(f"TODAY: {task['title']}")
+                            due_date_str = " (DUE TODAY)"
+                        else:
+                            days_left = (due_date - now).days
+                            if days_left <= 3:
+                                due_date_str = f" (due in {days_left} days)"
                     except (ValueError, TypeError):
-                        continue
-            
-            # Prioritize suggestions based on user's actual situation
-            if overdue_count > 0:
-                suggestions.append(f"🚨 Focus on {overdue_count} overdue task{'s' if overdue_count != 1 else ''} - tackle the smallest one first!")
-            
-            if today_count > 0:
-                suggestions.append(f"⏰ {today_count} task{'s' if today_count != 1 else ''} due today - prioritize your time wisely")
-            
-            if high_priority_count > 3:
-                suggestions.append("⚡ Consider reducing some high priority tasks to avoid overwhelm")
-            elif high_priority_count > 0:
-                suggestions.append(f"🎯 Focus on completing {high_priority_count} high priority task{'s' if high_priority_count != 1 else ''} first")
-            
-            # Project-specific suggestions
-            if len(projects) > 0:
-                projects_with_no_tasks = len([p for p in projects if not any(t.get('project_id') == p['id'] for t in tasks)])
-                if projects_with_no_tasks > 0:
-                    suggestions.append(f"📂 Add tasks to {projects_with_no_tasks} empty project{'s' if projects_with_no_tasks != 1 else ''}")
-                elif len(tasks) > 10 and not any(t.get('project_id') for t in tasks):
-                    suggestions.append("📊 Organize your tasks into projects for better structure")
-            
-            # Progress-based suggestions
-            if completed_count > 0:
-                if len(tasks) > 0:
-                    completion_rate = (completed_count / len(tasks)) * 100
-                    if completion_rate >= 50:
-                        suggestions.append(f"🎉 Great momentum! {completion_rate:.0f}% completion rate - keep it up!")
-                    else:
-                        suggestions.append(f"💪 You've completed {completed_count} task{'s' if completed_count != 1 else ''} - build on that progress!")
-            
-            # General productivity suggestions if we need more
-            if len(suggestions) < 3:
-                productivity_suggestions = [
-                    "📝 Break large tasks into smaller, manageable chunks for quick wins",
-                    "⏰ Set specific due dates for better time management",
-                    "🎯 Use the 2-minute rule: do quick tasks immediately",
-                    "📅 Review and plan your tasks each morning",
-                    "🔄 Group similar tasks together for efficiency"
-                ]
+                        pass
                 
-                # Add suggestions that aren't already covered
-                for suggestion in productivity_suggestions:
-                    if len(suggestions) < 4:
-                        suggestions.append(suggestion)
+                # Extract domain/category from task content
+                task_content = f"{task.get('title', '')} {task.get('description', '')}".lower()
+                for domain in ['marketing', 'development', 'design', 'finance', 'health', 'education', 'business', 'personal', 'research', 'writing']:
+                    if domain in task_content:
+                        task_domains.add(domain)
+                
+                detailed_context.append(
+                    f"{status_emoji} [{priority.upper()}] {task['title']}{due_date_str}\n"
+                    f"   Description: {task.get('description', 'No description')[:100]}"
+                )
             
-            return TaskSuggestionResponse(suggestions=suggestions[:4])
+            # Analyze projects with content
+            for project in projects:
+                project_tasks = [t for t in tasks if t.get('project_id') == project.get('id')]
+                completed_tasks = len([t for t in project_tasks if t.get('status') == 'completed'])
+                total_project_tasks = len(project_tasks)
+                
+                progress = f"{completed_tasks}/{total_project_tasks} tasks" if total_project_tasks > 0 else "No tasks"
+                
+                detailed_context.append(
+                    f"📂 PROJECT: {project.get('name', 'Untitled')}\n"
+                    f"   Description: {project.get('description', 'No description')[:100]}\n"
+                    f"   Progress: {progress}"
+                )
+            
+            # Create intelligent analysis prompt
+            prompt = f"""
+            You are an AI productivity assistant with access to web resources. Analyze this user's specific tasks and projects to provide 4 highly intelligent, personalized suggestions.
+
+            USER'S CURRENT WORK:
+            {chr(10).join(detailed_context)}
+
+            URGENT ITEMS:
+            {chr(10).join(urgent_items) if urgent_items else "No urgent items"}
+
+            DOMAINS DETECTED: {', '.join(task_domains) if task_domains else 'General productivity'}
+
+            REQUIREMENTS:
+            1. Analyze the ACTUAL CONTENT of tasks/projects, not just counts
+            2. Address urgent items with specific advice
+            3. Provide domain-specific suggestions based on task content
+            4. Include helpful external resources (websites, tools, documents) when relevant
+            5. Each suggestion must be actionable and specific to their situation
+
+            FORMAT REQUIREMENTS:
+            - Each suggestion starts with relevant emoji
+            - 80-120 characters per suggestion
+            - Include external resource links when applicable
+            - Be specific about their actual tasks, not generic advice
+
+            EXAMPLE GOOD SUGGESTIONS:
+            "🚨 Focus on overdue 'Marketing Campaign' - use Canva templates: canva.com/templates"
+            "📊 For 'Python Learning' project - start with Python.org official tutorial"
+            "⚡ Break 'Website Design' into: wireframe → mockup → code → test phases"
+            
+            Return ONLY a JSON array of exactly 4 suggestion strings.
+            """
+            
+            user_message = UserMessage(text=prompt)
+            response = await chat.send_message(user_message)
+            
+            try:
+                # Parse AI response
+                suggestions = json.loads(response.strip())
+                if isinstance(suggestions, list) and len(suggestions) >= 3:
+                    logger.info(f"AI generated intelligent suggestions: {suggestions}")
+                    return TaskSuggestionResponse(suggestions=suggestions[:4])
+                else:
+                    logger.warning(f"AI returned invalid format: {suggestions}")
+            except json.JSONDecodeError as e:
+                logger.error(f"AI returned malformed JSON: {response[:200]} | Error: {e}")
+            
+            # If AI fails, create intelligent fallback based on actual content
+            intelligent_suggestions = []
+            
+            # Address urgent items first with specific advice
+            if urgent_items:
+                overdue_count = len([item for item in urgent_items if "OVERDUE" in item])
+                today_count = len([item for item in urgent_items if "TODAY" in item])
+                
+                if overdue_count > 0:
+                    overdue_task = urgent_items[0].replace("OVERDUE: ", "")
+                    intelligent_suggestions.append(f"🚨 Tackle overdue '{overdue_task[:30]}...' - break into 25min focused sessions")
+                
+                if today_count > 0:
+                    today_task = [item for item in urgent_items if "TODAY" in item][0].replace("TODAY: ", "")
+                    intelligent_suggestions.append(f"⏰ Priority: '{today_task[:30]}...' - schedule specific time blocks today")
+            
+            # Domain-specific suggestions
+            if 'marketing' in task_domains:
+                intelligent_suggestions.append("📈 Marketing tasks detected - use Hootsuite.com for social media scheduling")
+            elif 'development' in task_domains:
+                intelligent_suggestions.append("💻 Coding projects found - try GitHub.com for version control and collaboration")
+            elif 'design' in task_domains:
+                intelligent_suggestions.append("🎨 Design work detected - check Figma.com for collaborative design tools")
+            elif 'education' in task_domains or 'research' in task_domains:
+                intelligent_suggestions.append("📚 Learning tasks found - use Khan Academy or Coursera for structured courses")
+            
+            # Project-specific advice
+            projects_without_tasks = [p for p in projects if not any(t.get('project_id') == p.get('id') for t in tasks)]
+            if projects_without_tasks:
+                project_name = projects_without_tasks[0].get('name', 'your project')
+                intelligent_suggestions.append(f"📂 Add specific tasks to '{project_name[:25]}...' project for better organization")
+            
+            # High-level productivity based on their patterns
+            high_priority_tasks = [t for t in tasks if t.get('priority') == 'high' and t.get('status') != 'completed']
+            if len(high_priority_tasks) > 3:
+                intelligent_suggestions.append("⚡ Too many high-priority items - use Eisenhower Matrix: urgent vs important")
+            elif len(tasks) > 10 and not projects:
+                intelligent_suggestions.append("📊 Consider grouping your tasks into projects - try GTD methodology")
+            else:
+                completed_count = len([t for t in tasks if t.get('status') == 'completed'])
+                if completed_count > 0:
+                    intelligent_suggestions.append(f"🎉 Great momentum with {completed_count} completed tasks - maintain your rhythm!")
+            
+            # Ensure we have 4 suggestions
+            while len(intelligent_suggestions) < 4:
+                fallback_suggestions = [
+                    "🎯 Use Pomodoro Technique (25min focus) - try Forest app for focus tracking",
+                    "📅 Time-block your calendar - Google Calendar has built-in time insights",
+                    "🔄 Review and adjust priorities weekly - Sunday planning sessions work well",
+                    "📝 Capture ideas in a note-taking app - Notion or Obsidian for knowledge management"
+                ]
+                for suggestion in fallback_suggestions:
+                    if suggestion not in intelligent_suggestions and len(intelligent_suggestions) < 4:
+                        intelligent_suggestions.append(suggestion)
+            
+            return TaskSuggestionResponse(suggestions=intelligent_suggestions[:4])
             
         except Exception as e:
-            logger.error(f"Enhanced suggestions error: {str(e)}")
-            # Ultimate fallback with some personalization
+            logger.error(f"Intelligent suggestions error: {str(e)}")
+            # Emergency fallback with task awareness
             task_count = len(tasks)
             project_count = len(projects)
             
-            if task_count == 0 and project_count == 0:
-                return TaskSuggestionResponse(suggestions=[
-                    "🚀 Start with creating your first task or project",
-                    "💡 Use natural language: 'Buy groceries this weekend'",
-                    "📊 Create projects to organize related tasks together"
-                ])
-            else:
-                return TaskSuggestionResponse(suggestions=[
-                    f"📋 You have {task_count} tasks - prioritize the most important ones",
-                    f"📂 {project_count} projects need attention - check their progress",
-                    "⚡ Focus on completing one task at a time for better results",
-                    "📅 Set realistic due dates to stay on track"
-                ])
+            emergency_suggestions = []
+            if task_count > 0:
+                emergency_suggestions.append(f"📋 Focus on your {task_count} tasks - identify the most impactful one first")
+                emergency_suggestions.append("🎯 Try timeboxing: allocate specific hours to specific tasks")
+            
+            if project_count > 0:
+                emergency_suggestions.append(f"📂 Review your {project_count} projects - ensure each has clear next actions")
+            
+            emergency_suggestions.extend([
+                "⚡ Use the 2-minute rule: do small tasks immediately",
+                "📅 Block time in calendar for deep work - Calendly.com for scheduling",
+                "🔄 Weekly review: assess progress and adjust priorities",
+                "💡 Document lessons learned - use Notion.so for knowledge management"
+            ])
+            
+            return TaskSuggestionResponse(suggestions=emergency_suggestions[:4])
     
     @router.get("/summary", response_model=TaskSummaryResponse)
     async def get_task_summary(req: Request):
