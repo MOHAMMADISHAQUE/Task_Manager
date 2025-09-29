@@ -105,16 +105,19 @@
           comment: "✅ Emergent Auth integration tested successfully: loginWithEmergent function properly calls POST /api/auth/emergent/callback with session_id, handles invalid session IDs with 400 error response and 'Invalid session ID' message, error handling works correctly with proper toast notifications, and authentication state management integrated properly with existing auth flow."
 
   - task: "Email Signup Error Message Display"
-    implemented: false
-    working: false
-    file: "/app/frontend/src/pages/Signup.js"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/contexts/AuthContext.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "❌ CRITICAL UX ISSUE IDENTIFIED: Frontend signup form is not displaying error messages to users when 400 Bad Request errors occur. Users receive no feedback when signup fails due to duplicate email, invalid email format, or missing fields. The backend correctly returns 400 errors with detailed error messages (e.g., 'User with this email already exists'), but the frontend AuthContext.signup() function only shows generic 'Signup failed' message without the specific backend error details. This creates poor UX where users think the system is broken when it's actually working correctly. The signup function needs to extract and display the specific error message from error.response?.data?.detail or error.response?.data?.message."
+        - working: true
+          agent: "testing"
+          comment: "✅ ERROR MESSAGE DISPLAY FIX VERIFIED: Comprehensive testing confirms the AuthContext.js signup function fix is working perfectly. ✅ DUPLICATE EMAIL: Users now see specific error message 'User with this email already exists' in red toast notification instead of generic 'Signup failed'. ✅ INVALID EMAIL: Browser validation and backend validation both provide appropriate error feedback. ✅ VALID SIGNUP: Normal signup flow works correctly and redirects to welcome page. ✅ BACKEND INTEGRATION: Error messages from error.response?.data?.detail and error.response?.data?.message are properly extracted and displayed to users. ✅ UX IMPROVEMENT: The critical UX issue has been COMPLETELY RESOLVED - users now receive proper feedback when signup fails with specific error details from the backend. The toast notification system displays error messages correctly with proper styling (red destructive variant)."
 
 backend:
 ##   - task: "Task name"
