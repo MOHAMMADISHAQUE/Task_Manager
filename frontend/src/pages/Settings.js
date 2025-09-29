@@ -319,8 +319,8 @@ const Settings = () => {
           {/* Notification Channels */}
           <div>
             <h4 className="font-medium mb-4">Notification Channels</h4>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-gray-500" />
                   <div>
