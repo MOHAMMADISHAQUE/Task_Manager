@@ -146,6 +146,67 @@ const Settings = () => {
     }
   };
 
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a valid image file (JPG, PNG, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const response = await fetch(`${BACKEND_URL}/api/settings/upload-photo`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Photo updated",
+          description: "Your profile photo has been updated successfully",
+        });
+        // Optionally update the avatar image source
+        // You might want to reload user data here
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Photo upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to update your photo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      // Clear the file input
+      event.target.value = '';
+    }
+  };
+
   const saveNotifications = async () => {
     try {
       setSaving(true);
