@@ -61,18 +61,55 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <Card className="border-0 shadow-xl">
-          <CardHeader className="text-center pb-8">
-            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <Sparkles className="h-6 w-6 text-white" />
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        {/* Floating Particles */}
+        <div className="absolute inset-0">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-white rounded-full opacity-20 animate-pulse"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${2 + Math.random() * 2}s`
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Gradient Orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+        <div className="absolute top-40 right-20 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-40 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className={`relative z-10 w-full max-w-2xl transform transition-all duration-1000 ${
+        mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+      }`}>
+        <Card className="border-0 shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20">
+          <CardHeader className="text-center pb-8 relative">
+            {/* Animated Logo */}
+            <div className="relative mx-auto mb-6">
+              <div className="absolute inset-0 w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full blur-lg opacity-60 animate-pulse"></div>
+              <div className="relative w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 group">
+                <Sparkles className="h-8 w-8 text-white animate-spin-slow group-hover:animate-bounce" />
+                {/* Orbiting elements */}
+                <div className="absolute inset-0 animate-spin-slow">
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 w-1.5 h-1.5 bg-pink-400 rounded-full"></div>
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cyan-400 rounded-full"></div>
+                </div>
+              </div>
             </div>
-            <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+
+            <CardTitle className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent mb-4 animate-fade-in-up">
               Welcome to SmartTask AI
             </CardTitle>
-            <CardDescription className="text-base text-gray-600 mt-2">
-              Let's set up your personal productivity workspace
+            <CardDescription className="text-lg text-white/80 animate-fade-in-up animation-delay-200">
+              Let's set up your <span className="text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text font-semibold">personal productivity workspace</span>
             </CardDescription>
           </CardHeader>
 
