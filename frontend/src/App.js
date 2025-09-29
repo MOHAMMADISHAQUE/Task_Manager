@@ -12,6 +12,7 @@ import Tasks from "./pages/Tasks";
 import Projects from "./pages/Projects";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import AuthCallback from "./pages/AuthCallback";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
