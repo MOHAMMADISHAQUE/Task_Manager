@@ -65,11 +65,15 @@ const Analytics = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in-up">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-        <p className="text-gray-600 mt-1">Get insights into your productivity and task performance.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <div className="transform hover:scale-105 transition-transform duration-300">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+            Analytics 📊
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Get insights into your productivity and task performance.</p>
+        </div>
       </div>
 
       {/* Key Metrics */}
