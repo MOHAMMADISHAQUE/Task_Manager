@@ -186,7 +186,7 @@ const Settings = () => {
       </div>
 
       {/* Profile Settings */}
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01] animate-fade-in-up">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
