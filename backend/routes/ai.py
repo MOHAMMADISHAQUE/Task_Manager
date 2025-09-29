@@ -49,13 +49,68 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
             
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
+            logger.error("EMERGENT_LLM_KEY not found in environment")
             return None
             
         return LlmChat(
             api_key=api_key,
             session_id="smarttask-ai",
-            system_message="You are a helpful task management assistant."
+            system_message="You are an intelligent task management assistant with access to web resources."
         ).with_model("openai", "gpt-5")
+    
+    def get_web_search():
+        """Initialize web search for finding external resources"""
+        if not WEB_SEARCH_AVAILABLE:
+            return None
+            
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return None
+            
+        return WebSearch(api_key=api_key)
+    
+    async def find_external_resources(task_domains: set, task_titles: list) -> dict:
+        """Find external resources for tasks using web search"""
+        resources = {}
+        
+        try:
+            web_search = get_web_search()
+            if not web_search:
+                return resources
+            
+            # Search for domain-specific tools and resources
+            for domain in task_domains:
+                search_query = f"best tools for {domain} productivity workflow 2024"
+                search_results = await web_search.search(search_query, max_results=3)
+                
+                if search_results and 'results' in search_results:
+                    for result in search_results['results'][:2]:  # Top 2 results
+                        resources[domain] = {
+                            'title': result.get('title', ''),
+                            'url': result.get('url', ''),
+                            'description': result.get('description', '')[:100]
+                        }
+                        break  # Take the first good result per domain
+                        
+            # Search for specific task help if we have clear task titles
+            for task_title in task_titles[:2]:  # Limit to 2 tasks
+                if len(task_title) > 5:  # Only search for substantial tasks
+                    search_query = f"how to {task_title.lower()} guide tutorial"
+                    search_results = await web_search.search(search_query, max_results=2)
+                    
+                    if search_results and 'results' in search_results:
+                        for result in search_results['results'][:1]:
+                            resources[f"task_{task_title[:20]}"] = {
+                                'title': result.get('title', ''),
+                                'url': result.get('url', ''),
+                                'description': result.get('description', '')[:100]
+                            }
+                            break
+                            
+        except Exception as e:
+            logger.error(f"Web search error: {e}")
+            
+        return resources
     
     def extract_date_from_text(text: str) -> datetime | None:
         """Extract due date from natural language text"""
