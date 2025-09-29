@@ -106,7 +106,7 @@ const Layout = ({ children }) => {
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:pt-16 z-30">
         <div className="flex flex-col flex-1 min-h-0 bg-white border-r border-gray-200">
-          <nav className="flex-1 px-4 py-2 space-y-0.5">
+          <nav className="flex-1 px-4 py-4 space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
