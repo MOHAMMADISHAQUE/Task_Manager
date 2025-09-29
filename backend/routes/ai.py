@@ -67,54 +67,70 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
     def get_web_search():
         """Initialize web search for finding external resources"""
         if not WEB_SEARCH_AVAILABLE:
+            logger.warning("Web search not available")
             return None
             
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
+            logger.warning("EMERGENT_LLM_KEY not found for web search")
             return None
             
-        return WebSearch(api_key=api_key)
+        try:
+            return WebSearch(api_key=api_key)
+        except Exception as e:
+            logger.error(f"Failed to initialize web search: {e}")
+            return None
     
     async def find_external_resources(task_domains: set, task_titles: list) -> dict:
         """Find external resources for tasks using web search"""
         resources = {}
         
+        # Return predefined resources if web search isn't available
+        predefined_resources = {
+            'marketing': {'title': 'Canva Design Templates', 'url': 'https://canva.com/templates', 'description': 'Professional design templates for marketing'},
+            'development': {'title': 'GitHub Code Repository', 'url': 'https://github.com', 'description': 'Version control and collaboration for developers'},
+            'design': {'title': 'Figma Design Tool', 'url': 'https://figma.com', 'description': 'Collaborative design and prototyping tool'},
+            'finance': {'title': 'Excel Financial Templates', 'url': 'https://templates.office.com/excel', 'description': 'Financial planning and analysis templates'},
+            'education': {'title': 'Khan Academy Learning', 'url': 'https://khanacademy.org', 'description': 'Free online courses and tutorials'},
+            'business': {'title': 'Notion Productivity Workspace', 'url': 'https://notion.so', 'description': 'All-in-one workspace for notes and planning'},
+        }
+        
         try:
             web_search = get_web_search()
-            if not web_search:
-                return resources
-            
-            # Search for domain-specific tools and resources
-            for domain in task_domains:
-                search_query = f"best tools for {domain} productivity workflow 2024"
-                search_results = await web_search.search(search_query, max_results=3)
-                
-                if search_results and 'results' in search_results:
-                    for result in search_results['results'][:2]:  # Top 2 results
-                        resources[domain] = {
-                            'title': result.get('title', ''),
-                            'url': result.get('url', ''),
-                            'description': result.get('description', '')[:100]
-                        }
-                        break  # Take the first good result per domain
+            if web_search:
+                logger.info("Using web search for external resources")
+                # Try web search for more specific resources
+                for domain in list(task_domains)[:2]:  # Limit to 2 domains
+                    try:
+                        search_query = f"best {domain} tools 2024"
+                        search_results = await web_search.search(search_query, max_results=2)
                         
-            # Search for specific task help if we have clear task titles
-            for task_title in task_titles[:2]:  # Limit to 2 tasks
-                if len(task_title) > 5:  # Only search for substantial tasks
-                    search_query = f"how to {task_title.lower()} guide tutorial"
-                    search_results = await web_search.search(search_query, max_results=2)
-                    
-                    if search_results and 'results' in search_results:
-                        for result in search_results['results'][:1]:
-                            resources[f"task_{task_title[:20]}"] = {
-                                'title': result.get('title', ''),
-                                'url': result.get('url', ''),
-                                'description': result.get('description', '')[:100]
-                            }
-                            break
-                            
+                        if search_results and 'results' in search_results:
+                            for result in search_results['results'][:1]:
+                                resources[domain] = {
+                                    'title': result.get('title', ''),
+                                    'url': result.get('url', ''),
+                                    'description': result.get('description', '')[:100]
+                                }
+                                break
+                    except Exception as e:
+                        logger.warning(f"Web search failed for {domain}: {e}")
+                        # Fall back to predefined resource
+                        if domain in predefined_resources:
+                            resources[domain] = predefined_resources[domain]
+            else:
+                logger.info("Using predefined resources (web search not available)")
+                # Use predefined resources when web search is not available
+                for domain in task_domains:
+                    if domain in predefined_resources:
+                        resources[domain] = predefined_resources[domain]
+                        
         except Exception as e:
-            logger.error(f"Web search error: {e}")
+            logger.error(f"Resource finding error: {e}")
+            # Ultimate fallback to predefined resources
+            for domain in task_domains:
+                if domain in predefined_resources:
+                    resources[domain] = predefined_resources[domain]
             
         return resources
     
