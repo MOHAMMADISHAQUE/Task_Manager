@@ -410,20 +410,22 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
     
     @router.get("/summary", response_model=TaskSummaryResponse)
     async def get_task_summary(req: Request):
-        """Generate an AI-powered summary of user's tasks"""
+        """Generate an AI-powered summary of user's tasks and projects"""
         
         # Get current user
         user = await get_current_user(req, db)
         
-        # Get user's tasks
+        # Get user's tasks and projects
         tasks = await db.tasks.find({"user_id": user["id"]}).to_list(length=None)
+        projects = await db.projects.find({"user_id": user["id"]}).to_list(length=None)
         
-        # Calculate stats
+        # Calculate comprehensive stats
         total_tasks = len(tasks)
         completed_tasks = len([t for t in tasks if t.get('status') == 'completed'])
         pending_tasks = total_tasks - completed_tasks
         
         overdue_tasks = 0
+        today_tasks = 0
         for t in tasks:
             if t.get('due_date') and t.get('status') != 'completed':
                 try:
@@ -431,29 +433,43 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
                     if isinstance(due_date, str):
                         due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
                     elif isinstance(due_date, datetime):
-                        # Already a datetime object
                         if due_date.tzinfo is None:
                             due_date = due_date.replace(tzinfo=timezone.utc)
                     
-                    if due_date < datetime.now(timezone.utc):
+                    now = datetime.now(timezone.utc)
+                    if due_date < now:
                         overdue_tasks += 1
+                    elif due_date.date() == now.date():
+                        today_tasks += 1
                 except (ValueError, TypeError):
-                    # Skip invalid dates
                     continue
         
         high_priority_tasks = len([t for t in tasks if t.get('priority') == 'high' and t.get('status') != 'completed'])
+        
+        # Project-related stats
+        total_projects = len(projects)
+        active_projects = len([p for p in projects if p.get('status') != 'completed'])
+        projects_with_tasks = 0
+        for project in projects:
+            project_tasks = [t for t in tasks if t.get('project_id') == project['id']]
+            if project_tasks:
+                projects_with_tasks += 1
         
         stats = {
             "total": total_tasks,
             "completed": completed_tasks,
             "pending": pending_tasks,
             "overdue": overdue_tasks,
-            "high_priority": high_priority_tasks
+            "today": today_tasks,
+            "high_priority": high_priority_tasks,
+            "projects_total": total_projects,
+            "projects_active": active_projects,
+            "projects_with_tasks": projects_with_tasks
         }
         
-        if total_tasks == 0:
+        if total_tasks == 0 and total_projects == 0:
             return TaskSummaryResponse(
-                summary="🎯 You're all set to start! Create your first task to begin organizing your work.",
+                summary="🎯 Ready to start! Create your first task or project to begin organizing your work.",
                 stats=stats
             )
         
@@ -461,49 +477,109 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
             chat = get_llm_chat()
             
             if chat:
+                # Create comprehensive context for AI
+                context_parts = []
+                
+                # Task context
+                if total_tasks > 0:
+                    completion_rate = (completed_tasks / total_tasks) * 100
+                    context_parts.append(f"Tasks: {total_tasks} total, {completed_tasks} completed ({completion_rate:.0f}% completion rate)")
+                    
+                    if overdue_tasks > 0:
+                        context_parts.append(f"{overdue_tasks} tasks are overdue")
+                    if today_tasks > 0:
+                        context_parts.append(f"{today_tasks} tasks due today")
+                    if high_priority_tasks > 0:
+                        context_parts.append(f"{high_priority_tasks} high priority tasks pending")
+                
+                # Project context
+                if total_projects > 0:
+                    context_parts.append(f"Projects: {total_projects} total, {active_projects} active")
+                    if projects_with_tasks < total_projects:
+                        empty_projects = total_projects - projects_with_tasks
+                        context_parts.append(f"{empty_projects} projects have no tasks assigned")
+                
                 prompt = f"""
-                Create a concise, encouraging summary of these task statistics:
+                Create a personalized, motivational summary based on this user's current situation:
                 
-                - Total tasks: {total_tasks}
-                - Completed: {completed_tasks}
-                - Pending: {pending_tasks}
-                - Overdue: {overdue_tasks}
-                - High priority pending: {high_priority_tasks}
+                {chr(10).join(context_parts)}
                 
-                Write a 2-3 sentence summary that's motivational and actionable. Include relevant emojis.
-                Focus on progress made and next steps. Keep it under 150 characters.
+                Write 2-3 sentences that:
+                - Acknowledge their progress and current state
+                - Highlight any urgent items (overdue, today's tasks)
+                - Provide encouragement and next steps
+                - Include relevant emojis
+                - Keep it under 150 characters total
+                
+                Be specific to their actual situation, not generic.
                 """
                 
                 user_message = UserMessage(text=prompt)
                 response = await chat.send_message(user_message)
                 
                 summary = response.strip()
-                if len(summary) > 200:  # Fallback if too long
+                if len(summary) > 200:
                     summary = summary[:150] + "..."
                 
                 return TaskSummaryResponse(summary=summary, stats=stats)
             
-            # Mock summary generation
-            if completed_tasks > 0:
-                completion_rate = (completed_tasks / total_tasks) * 100
-                summary = f"🎉 Great progress! You've completed {completion_rate:.0f}% of your tasks"
-            else:
-                summary = "🚀 Ready to tackle your tasks!"
+            # Enhanced intelligent fallback summary
+            summary_parts = []
             
+            # Progress acknowledgment
+            if completed_tasks > 0:
+                completion_rate = (completed_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+                if completion_rate >= 75:
+                    summary_parts.append(f"🎉 Outstanding! {completion_rate:.0f}% completion rate")
+                elif completion_rate >= 50:
+                    summary_parts.append(f"💪 Great progress! {completion_rate:.0f}% tasks completed")
+                else:
+                    summary_parts.append(f"🚀 Building momentum with {completed_tasks} tasks done")
+            
+            # Urgent items first
             if overdue_tasks > 0:
-                summary += f" 🚨 {overdue_tasks} task{'s' if overdue_tasks != 1 else ''} need immediate attention."
+                summary_parts.append(f"🚨 {overdue_tasks} overdue task{'s' if overdue_tasks != 1 else ''} need attention")
+            elif today_tasks > 0:
+                summary_parts.append(f"⏰ {today_tasks} task{'s' if today_tasks != 1 else ''} due today")
             elif high_priority_tasks > 0:
-                summary += f" ⚡ Focus on {high_priority_tasks} high priority task{'s' if high_priority_tasks != 1 else ''} next."
+                summary_parts.append(f"⚡ {high_priority_tasks} high priority task{'s' if high_priority_tasks != 1 else ''} to focus on")
+            
+            # Project status
+            if total_projects > 0:
+                if projects_with_tasks < total_projects:
+                    empty_projects = total_projects - projects_with_tasks
+                    summary_parts.append(f"📂 {empty_projects} project{'s' if empty_projects != 1 else ''} ready for tasks")
+                elif active_projects > 0:
+                    summary_parts.append(f"📊 {active_projects} active project{'s' if active_projects != 1 else ''} in progress")
+            
+            # Encouragement
+            if not summary_parts:
+                if total_tasks > 0:
+                    summary_parts.append("🎯 Ready to tackle your tasks!")
+                else:
+                    summary_parts.append("🚀 Time to create your first task!")
+            
+            # Combine with appropriate connectors
+            if len(summary_parts) == 1:
+                summary = summary_parts[0]
+            elif len(summary_parts) == 2:
+                summary = f"{summary_parts[0]}. {summary_parts[1]}."
             else:
-                summary += " Keep up the momentum! 💪"
+                summary = f"{summary_parts[0]}. {summary_parts[1]}. Keep it up! 💪"
             
             return TaskSummaryResponse(summary=summary, stats=stats)
             
         except Exception as e:
-            logger.error(f"Summary error: {str(e)}")
-            return TaskSummaryResponse(
-                summary=f"📊 You have {pending_tasks} pending tasks out of {total_tasks} total. Keep going! 💪",
-                stats=stats
-            )
+            logger.error(f"Enhanced summary error: {str(e)}")
+            # Ultimate fallback
+            if total_tasks > 0:
+                summary = f"📊 {pending_tasks} pending tasks out of {total_tasks} total"
+                if total_projects > 0:
+                    summary += f" across {total_projects} projects"
+                summary += ". Keep going! 💪"
+            else:
+                summary = "🎯 Ready to start your productivity journey!"
+                
+            return TaskSummaryResponse(summary=summary, stats=stats)
     
     return router
