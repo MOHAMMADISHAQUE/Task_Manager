@@ -581,11 +581,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Clean User Registration - No Auto Sample Data"
-    - "Onboarding Status Check (GET /api/onboarding/status)"
-    - "Workspace Setup (POST /api/onboarding/setup)"
-    - "Personalized Sample Data Generation"
-    - "Data Uniqueness Between Users"
+    - "Desktop Navigation Fix - Overlay Issues"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
