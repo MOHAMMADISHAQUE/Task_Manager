@@ -267,10 +267,24 @@ const Settings = () => {
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
             <div className="space-y-3">
-              <Button variant="outline" size="sm" className="h-9">
-                <Camera className="mr-2 h-4 w-4" />
-                Change Photo
-              </Button>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  disabled={isUploading}
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-9" 
+                  disabled={isUploading}
+                >
+                  <Camera className="mr-2 h-4 w-4" />
+                  {isUploading ? 'Uploading...' : 'Change Photo'}
+                </Button>
+              </div>
               <p className="text-xs text-gray-500">JPG, PNG up to 2MB</p>
             </div>
           </div>
