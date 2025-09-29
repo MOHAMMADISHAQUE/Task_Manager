@@ -33,39 +33,6 @@ const Dashboard = () => {
   const [taskSummary, setTaskSummary] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
   
-  // Handle Emergent Auth callback on dashboard
-  useEffect(() => {
-    const handleEmergentCallback = async () => {
-      const hash = window.location.hash;
-      const urlParams = new URLSearchParams(hash.substring(1));
-      const sessionId = urlParams.get('session_id');
-      
-      if (sessionId) {
-        setEmergentLoading(true);
-        const result = await loginWithEmergent(sessionId);
-        
-        if (result.success) {
-          toast({
-            title: "Welcome to SmartTask AI! 🎉",
-            description: "You have been successfully logged in with Google.",
-          });
-          
-          // Clean the URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } else {
-          toast({
-            title: "Login Failed",
-            description: result.message,
-            variant: "destructive",
-          });
-        }
-        setEmergentLoading(false);
-      }
-    };
-
-    handleEmergentCallback();
-  }, [loginWithEmergent, toast]);
-
   // Load AI suggestions on component mount
   useEffect(() => {
     if (tasks.length > 0) {
