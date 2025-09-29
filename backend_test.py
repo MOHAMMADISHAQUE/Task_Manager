@@ -1245,6 +1245,436 @@ class AuthTestSuite:
         except Exception as e:
             self.log_test("settings_without_auth", False, f"Exception: {str(e)}")
 
+    # ========== ONBOARDING API TESTS ==========
+    
+    def test_clean_user_registration_no_auto_sample_data(self):
+        """Test that new user signup creates clean workspace with no automatic sample data"""
+        try:
+            # Create a completely new user
+            clean_user_email = f"cleanuser_{uuid.uuid4().hex[:8]}@example.com"
+            clean_user_name = "Clean Test User"
+            
+            signup_payload = {
+                "name": clean_user_name,
+                "email": clean_user_email,
+                "password": "cleanpassword123"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if response.status_code == 200:
+                # Check onboarding status immediately after signup
+                status_response = self.session.get(f"{BASE_URL}/onboarding/status")
+                
+                if status_response.status_code == 200:
+                    status_data = status_response.json()
+                    if (status_data.get("onboarded") == False and 
+                        status_data.get("tasks_count") == 0 and 
+                        status_data.get("projects_count") == 0):
+                        self.log_test("clean_user_registration_no_auto_sample_data", True, 
+                                    f"New user starts with clean workspace: {status_data}")
+                    else:
+                        self.log_test("clean_user_registration_no_auto_sample_data", False, 
+                                    f"New user has unexpected data: {status_data}")
+                else:
+                    self.log_test("clean_user_registration_no_auto_sample_data", False, 
+                                f"Failed to check onboarding status: {status_response.status_code}")
+            else:
+                self.log_test("clean_user_registration_no_auto_sample_data", False, 
+                            f"Failed to create user: {response.status_code}")
+                
+        except Exception as e:
+            self.log_test("clean_user_registration_no_auto_sample_data", False, f"Exception: {str(e)}")
+    
+    def test_onboarding_status_check_new_user(self):
+        """Test onboarding status check for brand new user"""
+        try:
+            # Create a new user
+            new_user_email = f"statustest_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Status Test User",
+                "email": new_user_email,
+                "password": "statustest123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("onboarding_status_check_new_user", False, "Failed to create test user")
+                return
+            
+            # Check onboarding status
+            response = self.session.get(f"{BASE_URL}/onboarding/status")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["onboarded", "tasks_count", "projects_count", "has_settings"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    if (data["onboarded"] == False and 
+                        data["tasks_count"] == 0 and 
+                        data["projects_count"] == 0):
+                        self.log_test("onboarding_status_check_new_user", True, 
+                                    f"Correctly detected new user: onboarded={data['onboarded']}")
+                    else:
+                        self.log_test("onboarding_status_check_new_user", False, 
+                                    f"Incorrect status for new user: {data}")
+                else:
+                    self.log_test("onboarding_status_check_new_user", False, 
+                                f"Missing status fields: {missing_fields}")
+            else:
+                self.log_test("onboarding_status_check_new_user", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("onboarding_status_check_new_user", False, f"Exception: {str(e)}")
+    
+    def test_onboarding_status_check_existing_user(self):
+        """Test onboarding status check for user with existing data"""
+        try:
+            # Use main test user who should have tasks from previous tests
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("onboarding_status_check_existing_user", False, "Failed to login for test setup")
+                return
+            
+            response = self.session.get(f"{BASE_URL}/onboarding/status")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("onboarded") == True:
+                    self.log_test("onboarding_status_check_existing_user", True, 
+                                f"Correctly detected existing user: tasks={data.get('tasks_count')}, projects={data.get('projects_count')}")
+                else:
+                    self.log_test("onboarding_status_check_existing_user", False, 
+                                f"Failed to detect existing user data: {data}")
+            else:
+                self.log_test("onboarding_status_check_existing_user", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("onboarding_status_check_existing_user", False, f"Exception: {str(e)}")
+    
+    def test_workspace_setup_clean_workspace(self):
+        """Test workspace setup with clean workspace choice"""
+        try:
+            # Create a new user for this test
+            clean_setup_email = f"cleansetup_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Clean Setup User",
+                "email": clean_setup_email,
+                "password": "cleansetup123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("workspace_setup_clean_workspace", False, "Failed to create test user")
+                return
+            
+            # Setup clean workspace
+            setup_payload = {
+                "add_sample_data": False,
+                "workspace_type": "clean"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/onboarding/setup", json=setup_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if (data.get("success") == True and 
+                    data.get("projects_count") == 0 and 
+                    data.get("tasks_count") == 0 and
+                    "clean workspace" in data.get("message", "").lower()):
+                    self.log_test("workspace_setup_clean_workspace", True, 
+                                f"Clean workspace setup successful: {data['message']}")
+                else:
+                    self.log_test("workspace_setup_clean_workspace", False, 
+                                f"Unexpected clean workspace response: {data}")
+            else:
+                self.log_test("workspace_setup_clean_workspace", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("workspace_setup_clean_workspace", False, f"Exception: {str(e)}")
+    
+    def test_workspace_setup_with_sample_data(self):
+        """Test workspace setup with sample data choice"""
+        try:
+            # Create a new user for this test
+            sample_setup_email = f"samplesetup_{uuid.uuid4().hex[:8]}@example.com"
+            sample_setup_name = "Sample Setup User"
+            
+            signup_payload = {
+                "name": sample_setup_name,
+                "email": sample_setup_email,
+                "password": "samplesetup123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("workspace_setup_with_sample_data", False, "Failed to create test user")
+                return
+            
+            # Setup workspace with sample data
+            setup_payload = {
+                "add_sample_data": True,
+                "workspace_type": "sample"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/onboarding/setup", json=setup_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if (data.get("success") == True and 
+                    data.get("projects_count") > 0 and 
+                    data.get("tasks_count") > 0 and
+                    "sample data" in data.get("message", "").lower()):
+                    self.log_test("workspace_setup_with_sample_data", True, 
+                                f"Sample data setup successful: {data['projects_count']} projects, {data['tasks_count']} tasks")
+                else:
+                    self.log_test("workspace_setup_with_sample_data", False, 
+                                f"Unexpected sample data response: {data}")
+            else:
+                self.log_test("workspace_setup_with_sample_data", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("workspace_setup_with_sample_data", False, f"Exception: {str(e)}")
+    
+    def test_personalized_sample_data_generation(self):
+        """Test that sample data is personalized and includes user name"""
+        try:
+            # Create a new user with a specific name
+            personalized_email = f"personalized_{uuid.uuid4().hex[:8]}@example.com"
+            personalized_name = "Alice Johnson"
+            
+            signup_payload = {
+                "name": personalized_name,
+                "email": personalized_email,
+                "password": "personalized123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("personalized_sample_data_generation", False, "Failed to create test user")
+                return
+            
+            # Setup workspace with sample data
+            setup_payload = {
+                "add_sample_data": True
+            }
+            
+            setup_response = self.session.post(f"{BASE_URL}/onboarding/setup", json=setup_payload)
+            
+            if setup_response.status_code != 200:
+                self.log_test("personalized_sample_data_generation", False, "Failed to setup sample data")
+                return
+            
+            # Get projects to check for personalization
+            projects_response = self.session.get(f"{BASE_URL}/projects")
+            
+            if projects_response.status_code == 200:
+                projects_data = projects_response.json()
+                projects = projects_data.get("projects", [])
+                
+                if len(projects) >= 3:  # Should have 3-5 projects
+                    # Check for randomization - projects should have varied statuses, priorities
+                    statuses = [p.get("status") for p in projects]
+                    priorities = [p.get("priority") for p in projects]
+                    
+                    # Check for team member personalization
+                    has_user_name = False
+                    for project in projects:
+                        team_members = project.get("team_members", [])
+                        if personalized_name in team_members:
+                            has_user_name = True
+                            break
+                    
+                    if len(set(statuses)) > 1 or len(set(priorities)) > 1:
+                        if has_user_name:
+                            self.log_test("personalized_sample_data_generation", True, 
+                                        f"Sample data is personalized: {len(projects)} projects with user name included")
+                        else:
+                            self.log_test("personalized_sample_data_generation", True, 
+                                        f"Sample data is randomized: {len(projects)} projects with varied attributes")
+                    else:
+                        self.log_test("personalized_sample_data_generation", False, 
+                                    "Sample data lacks randomization")
+                else:
+                    self.log_test("personalized_sample_data_generation", False, 
+                                f"Insufficient projects generated: {len(projects)}")
+            else:
+                self.log_test("personalized_sample_data_generation", False, 
+                            f"Failed to retrieve projects: {projects_response.status_code}")
+                
+        except Exception as e:
+            self.log_test("personalized_sample_data_generation", False, f"Exception: {str(e)}")
+    
+    def test_data_uniqueness_between_users(self):
+        """Test that different users get different sample data combinations"""
+        try:
+            # Create two users and compare their sample data
+            user1_email = f"unique1_{uuid.uuid4().hex[:8]}@example.com"
+            user2_email = f"unique2_{uuid.uuid4().hex[:8]}@example.com"
+            
+            users_data = []
+            
+            for i, email in enumerate([user1_email, user2_email], 1):
+                # Clear session for each user
+                self.session.cookies.clear()
+                
+                # Create user
+                signup_payload = {
+                    "name": f"Unique User {i}",
+                    "email": email,
+                    "password": f"unique{i}password123"
+                }
+                
+                signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+                
+                if signup_response.status_code != 200:
+                    self.log_test("data_uniqueness_between_users", False, f"Failed to create user {i}")
+                    return
+                
+                # Setup with sample data
+                setup_payload = {"add_sample_data": True}
+                setup_response = self.session.post(f"{BASE_URL}/onboarding/setup", json=setup_payload)
+                
+                if setup_response.status_code != 200:
+                    self.log_test("data_uniqueness_between_users", False, f"Failed to setup user {i}")
+                    return
+                
+                # Get user's projects and tasks
+                projects_response = self.session.get(f"{BASE_URL}/projects")
+                tasks_response = self.session.get(f"{BASE_URL}/tasks")
+                
+                if projects_response.status_code == 200 and tasks_response.status_code == 200:
+                    projects = projects_response.json().get("projects", [])
+                    tasks = tasks_response.json().get("tasks", [])
+                    
+                    # Extract key data for comparison
+                    project_names = [p.get("name") for p in projects]
+                    task_titles = [t.get("title") for t in tasks]
+                    
+                    users_data.append({
+                        "email": email,
+                        "project_names": set(project_names),
+                        "task_titles": set(task_titles),
+                        "projects_count": len(projects),
+                        "tasks_count": len(tasks)
+                    })
+                else:
+                    self.log_test("data_uniqueness_between_users", False, f"Failed to get data for user {i}")
+                    return
+            
+            # Compare the two users' data
+            if len(users_data) == 2:
+                user1_data = users_data[0]
+                user2_data = users_data[1]
+                
+                # Check if project names are different
+                common_projects = user1_data["project_names"].intersection(user2_data["project_names"])
+                common_tasks = user1_data["task_titles"].intersection(user2_data["task_titles"])
+                
+                # Allow some overlap but ensure significant differences
+                project_overlap_ratio = len(common_projects) / max(len(user1_data["project_names"]), 1)
+                task_overlap_ratio = len(common_tasks) / max(len(user1_data["task_titles"]), 1)
+                
+                if project_overlap_ratio < 0.8 and task_overlap_ratio < 0.8:
+                    self.log_test("data_uniqueness_between_users", True, 
+                                f"Users have unique data: User1({user1_data['projects_count']}p,{user1_data['tasks_count']}t) vs User2({user2_data['projects_count']}p,{user2_data['tasks_count']}t), overlap: {project_overlap_ratio:.1%} projects, {task_overlap_ratio:.1%} tasks")
+                else:
+                    self.log_test("data_uniqueness_between_users", False, 
+                                f"Too much data overlap between users: {project_overlap_ratio:.1%} projects, {task_overlap_ratio:.1%} tasks")
+            else:
+                self.log_test("data_uniqueness_between_users", False, "Failed to collect data from both users")
+                
+        except Exception as e:
+            self.log_test("data_uniqueness_between_users", False, f"Exception: {str(e)}")
+    
+    def test_onboarding_already_setup_user(self):
+        """Test that users who already have data can't re-onboard"""
+        try:
+            # Use main test user who should have tasks from previous tests
+            login_payload = {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD
+            }
+            
+            login_response = self.session.post(f"{BASE_URL}/auth/login", json=login_payload)
+            
+            if login_response.status_code != 200:
+                self.log_test("onboarding_already_setup_user", False, "Failed to login for test setup")
+                return
+            
+            # Try to setup workspace again
+            setup_payload = {
+                "add_sample_data": True
+            }
+            
+            response = self.session.post(f"{BASE_URL}/onboarding/setup", json=setup_payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if (data.get("success") == True and 
+                    "already set up" in data.get("message", "").lower()):
+                    self.log_test("onboarding_already_setup_user", True, 
+                                f"Correctly prevented re-onboarding: {data['message']}")
+                else:
+                    self.log_test("onboarding_already_setup_user", False, 
+                                f"Unexpected response for existing user: {data}")
+            else:
+                self.log_test("onboarding_already_setup_user", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("onboarding_already_setup_user", False, f"Exception: {str(e)}")
+    
+    def test_onboarding_endpoints_authentication(self):
+        """Test that onboarding endpoints require authentication"""
+        try:
+            # Clear session
+            self.session.cookies.clear()
+            
+            endpoints = [
+                ("/onboarding/status", "GET"),
+                ("/onboarding/setup", "POST")
+            ]
+            
+            all_protected = True
+            failed_endpoint = None
+            
+            for endpoint, method in endpoints:
+                if method == "GET":
+                    response = self.session.get(f"{BASE_URL}{endpoint}")
+                else:
+                    response = self.session.post(f"{BASE_URL}{endpoint}", json={"add_sample_data": False})
+                
+                if response.status_code != 401:
+                    all_protected = False
+                    failed_endpoint = f"{method} {endpoint}"
+                    break
+            
+            if all_protected:
+                self.log_test("onboarding_endpoints_authentication", True, "All onboarding endpoints properly protected")
+            else:
+                self.log_test("onboarding_endpoints_authentication", False, f"Endpoint not protected: {failed_endpoint}")
+                
+        except Exception as e:
+            self.log_test("onboarding_endpoints_authentication", False, f"Exception: {str(e)}")
+
     # ========== NOTIFICATIONS API TESTS ==========
     
     def test_create_test_notifications(self):
