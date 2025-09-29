@@ -364,7 +364,9 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <Separator />
+
+          <div className="flex justify-end pt-2">
             <Button 
               onClick={saveProfile}
               disabled={saving || loading}
