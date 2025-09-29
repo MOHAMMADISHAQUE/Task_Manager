@@ -1486,8 +1486,7 @@ class AuthTestSuite:
             projects_response = self.session.get(f"{BASE_URL}/projects")
             
             if projects_response.status_code == 200:
-                projects_data = projects_response.json()
-                projects = projects_data.get("projects", [])
+                projects = projects_response.json()  # API returns list directly
                 
                 if len(projects) >= 3:  # Should have 3-5 projects
                     # Check for randomization - projects should have varied statuses, priorities
