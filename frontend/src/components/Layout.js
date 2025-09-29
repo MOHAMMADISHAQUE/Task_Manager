@@ -130,8 +130,11 @@ const Layout = ({ children }) => {
             })}
           </nav>
           
-          {/* Quick Stats Widget */}
-          <div className="flex-1 px-4 pb-4">
+          {/* Spacer to push Quick Stats to bottom */}
+          <div className="flex-1"></div>
+          
+          {/* Quick Stats Widget - Positioned at bottom */}
+          <div className="px-4 pb-4">
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-4 border border-blue-100">
               <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
