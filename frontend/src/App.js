@@ -60,9 +60,11 @@ function App() {
               } />
               </Routes>
               <Toaster />
-            </NotificationProvider>
-          </TaskProvider>
-        </AuthProvider>
+                </NotificationProvider>
+              </TaskProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </div>
   );
