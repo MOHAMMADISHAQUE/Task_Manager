@@ -568,7 +568,7 @@ def generate_sample_data(user_id: str):
     
     return projects, tasks
 
-async def seed_user_data(user_id: str):
+async def seed_user_data(user_id: str, user_name: str = None, use_sample_data: bool = False):
     """Add sample data for a specific user."""
     # MongoDB connection
     mongo_url = os.environ['MONGO_URL']
@@ -582,18 +582,22 @@ async def seed_user_data(user_id: str):
             print(f"User {user_id} already has {existing_tasks} tasks, skipping seed data")
             return
         
-        # Generate sample data
-        projects, tasks = generate_sample_data(user_id)
-        
-        # Insert projects
-        if projects:
-            await db.projects.insert_many(projects)
-            print(f"Inserted {len(projects)} sample projects for user {user_id}")
-        
-        # Insert tasks
-        if tasks:
-            await db.tasks.insert_many(tasks)
-            print(f"Inserted {len(tasks)} sample tasks for user {user_id}")
+        # Only add sample data if requested
+        if use_sample_data:
+            # Generate personalized sample data
+            projects, tasks = generate_personalized_sample_data(user_id, user_name)
+            
+            # Insert projects
+            if projects:
+                await db.projects.insert_many(projects)
+                print(f"Inserted {len(projects)} personalized sample projects for user {user_id}")
+            
+            # Insert tasks
+            if tasks:
+                await db.tasks.insert_many(tasks)
+                print(f"Inserted {len(tasks)} personalized sample tasks for user {user_id}")
+        else:
+            print(f"User {user_id} chose to start with clean workspace")
             
     except Exception as e:
         print(f"Error seeding data for user {user_id}: {e}")
@@ -601,6 +605,6 @@ async def seed_user_data(user_id: str):
         client.close()
 
 # Function to be called when a new user signs up
-async def initialize_new_user(user_id: str):
-    """Initialize a new user with sample data."""
-    await seed_user_data(user_id)
+async def initialize_new_user(user_id: str, user_name: str = None, use_sample_data: bool = False):
+    """Initialize a new user with optional sample data."""
+    await seed_user_data(user_id, user_name, use_sample_data)
