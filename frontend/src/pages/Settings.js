@@ -200,64 +200,90 @@ const Settings = () => {
           </CardTitle>
           <CardDescription>Update your personal information and profile details.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8">
           {/* Avatar */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <Avatar className="h-20 w-20">
               <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
-            <div>
-              <Button variant="outline" size="sm">
+            <div className="space-y-3">
+              <Button variant="outline" size="sm" className="h-9">
                 <Camera className="mr-2 h-4 w-4" />
                 Change Photo
               </Button>
-              <p className="text-xs text-gray-500 mt-1">JPG, PNG up to 2MB</p>
+              <p className="text-xs text-gray-500">JPG, PNG up to 2MB</p>
             </div>
           </div>
 
           {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
               <Input
                 id="name"
                 value={profile.name}
                 onChange={(e) => handleProfileChange('name', e.target.value)}
+                disabled={loading}
+                className="h-10"
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 value={profile.email}
-                onChange={(e) => handleProfileChange('email', e.target.value)}
+                disabled
+                className="bg-gray-50 dark:bg-gray-800 h-10"
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
+            <div className="space-y-3">
+              <Label htmlFor="role" className="text-sm font-medium">Role</Label>
               <Input
                 id="role"
                 value={profile.role}
                 onChange={(e) => handleProfileChange('role', e.target.value)}
+                placeholder="e.g. Product Manager"
+                disabled={loading}
+                className="h-10"
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Timezone</Label>
+            <div className="space-y-3">
+              <Label htmlFor="timezone" className="text-sm font-medium">Timezone</Label>
               <Select value={profile.timezone} onValueChange={(value) => handleProfileChange('timezone', value)}>
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="UTC-8">Pacific Time (UTC-8)</SelectItem>
-                  <SelectItem value="UTC-5">Eastern Time (UTC-5)</SelectItem>
-                  <SelectItem value="UTC+0">Greenwich Mean Time (UTC+0)</SelectItem>
-                  <SelectItem value="UTC+1">Central European Time (UTC+1)</SelectItem>
-                  <SelectItem value="UTC+9">Japan Standard Time (UTC+9)</SelectItem>
+                  <SelectItem value="UTC-12">UTC-12</SelectItem>
+                  <SelectItem value="UTC-11">UTC-11</SelectItem>
+                  <SelectItem value="UTC-10">UTC-10</SelectItem>
+                  <SelectItem value="UTC-9">UTC-9</SelectItem>
+                  <SelectItem value="UTC-8">UTC-8</SelectItem>
+                  <SelectItem value="UTC-7">UTC-7</SelectItem>
+                  <SelectItem value="UTC-6">UTC-6</SelectItem>
+                  <SelectItem value="UTC-5">UTC-5</SelectItem>
+                  <SelectItem value="UTC-4">UTC-4</SelectItem>
+                  <SelectItem value="UTC-3">UTC-3</SelectItem>
+                  <SelectItem value="UTC-2">UTC-2</SelectItem>
+                  <SelectItem value="UTC-1">UTC-1</SelectItem>
+                  <SelectItem value="UTC+0">UTC+0</SelectItem>
+                  <SelectItem value="UTC+1">UTC+1</SelectItem>
+                  <SelectItem value="UTC+2">UTC+2</SelectItem>
+                  <SelectItem value="UTC+3">UTC+3</SelectItem>
+                  <SelectItem value="UTC+4">UTC+4</SelectItem>
+                  <SelectItem value="UTC+5">UTC+5</SelectItem>
+                  <SelectItem value="UTC+6">UTC+6</SelectItem>
+                  <SelectItem value="UTC+7">UTC+7</SelectItem>
+                  <SelectItem value="UTC+8">UTC+8</SelectItem>
+                  <SelectItem value="UTC+9">UTC+9</SelectItem>
+                  <SelectItem value="UTC+10">UTC+10</SelectItem>
+                  <SelectItem value="UTC+11">UTC+11</SelectItem>
+                  <SelectItem value="UTC+12">UTC+12</SelectItem>
                 </SelectContent>
               </Select>
             </div>
