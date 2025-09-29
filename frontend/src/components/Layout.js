@@ -33,6 +33,23 @@ const Layout = ({ children }) => {
     return location.pathname === href || (href === "/dashboard" && location.pathname === "/");
   };
 
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Loading SmartTask AI...
+          </h2>
+          <p className="text-gray-600">
+            Setting up your workspace
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navbar */}
