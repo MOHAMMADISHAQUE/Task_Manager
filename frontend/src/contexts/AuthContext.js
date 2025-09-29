@@ -49,9 +49,10 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error.response?.data);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+        message: error.response?.data?.detail || error.response?.data?.message || 'Login failed' 
       };
     }
   };
