@@ -125,7 +125,7 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div className="transform hover:scale-105 transition-transform duration-300">
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Dashboard ✨
+            Dashboard
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome back! Here's what's happening with your tasks.</p>
         </div>
