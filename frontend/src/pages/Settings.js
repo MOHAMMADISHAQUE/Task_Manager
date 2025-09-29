@@ -180,7 +180,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-4xl animate-fade-in-up">
+    <div className="space-y-8 max-w-4xl animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div className="transform hover:scale-105 transition-transform duration-300">
