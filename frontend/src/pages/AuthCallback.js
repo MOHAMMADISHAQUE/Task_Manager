@@ -23,13 +23,40 @@ const AuthCallback = () => {
           const result = await loginWithEmergent(sessionId);
           
           if (result.success) {
-            toast({
-              title: "Welcome to SmartTask AI! 🎉",
-              description: "You have been successfully logged in with Google.",
-            });
-            
-            // Redirect to dashboard after successful auth
-            navigate('/dashboard', { replace: true });
+            // Check if user needs onboarding
+            try {
+              const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+              const onboardingResponse = await fetch(`${BACKEND_URL}/api/onboarding/status`, {
+                credentials: 'include'
+              });
+              
+              if (onboardingResponse.ok) {
+                const onboardingData = await onboardingResponse.json();
+                
+                if (!onboardingData.onboarded) {
+                  // New user - show welcome/onboarding
+                  toast({
+                    title: "Welcome to SmartTask AI! 🎉",
+                    description: "Let's set up your workspace",
+                  });
+                  navigate('/welcome', { replace: true });
+                } else {
+                  // Existing user - go to dashboard
+                  toast({
+                    title: "Welcome back! 🎉",
+                    description: "You have been successfully logged in.",
+                  });
+                  navigate('/dashboard', { replace: true });
+                }
+              } else {
+                // Fallback to dashboard if onboarding check fails
+                navigate('/dashboard', { replace: true });
+              }
+            } catch (error) {
+              console.error('Failed to check onboarding status:', error);
+              // Fallback to dashboard
+              navigate('/dashboard', { replace: true });
+            }
           } else {
             console.error('Emergent auth failed:', result.message);
             toast({
