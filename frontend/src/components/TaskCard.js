@@ -132,8 +132,9 @@ const TaskCard = ({ task, onEdit, compact = false }) => {
   }
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 hover:border-blue-200">
-      <CardContent className="p-3 sm:p-4">
+    <Card className="group hover:shadow-xl transition-all duration-300 hover:border-blue-300 transform hover:scale-[1.02] hover:-translate-y-1 animate-fade-in-up">
+      <CardContent className="relative p-3 sm:p-4 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-start gap-3 flex-1">
             <Checkbox 
