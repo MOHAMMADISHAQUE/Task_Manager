@@ -149,8 +149,10 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64 pt-14 sm:pt-16">
-        <main className="p-3 sm:p-4 lg:p-6">
+      <div className="lg:pl-64 pt-14 sm:pt-16 relative">
+        {/* Subtle animated background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-white to-purple-50/30 animate-pulse" style={{ animationDuration: '8s' }}></div>
+        <main className="relative p-3 sm:p-4 lg:p-6">
           {children}
         </main>
       </div>
