@@ -36,8 +36,6 @@ except ImportError:
 from auth.dependencies import get_current_user
 from models.tasks import Task
 
-logger = logging.getLogger(__name__)
-
 class NaturalTaskRequest(BaseModel):
     text: str
 
