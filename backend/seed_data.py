@@ -89,7 +89,149 @@ TASK_TEMPLATES = [
 ]
 
 def generate_personalized_sample_data(user_id: str, user_name: str = None):
-    """Generate sample tasks and projects for a user."""
+    """Generate personalized sample tasks and projects for a user."""
+    
+    # Randomly select project templates (3-5 projects)
+    num_projects = random.randint(3, 5)
+    selected_project_templates = random.sample(PROJECT_TEMPLATES, min(num_projects, len(PROJECT_TEMPLATES)))
+    
+    projects = []
+    for i, template in enumerate(selected_project_templates):
+        # Randomize project details
+        progress = random.randint(0, 100) if template["category"] != "personal" else random.randint(0, 80)
+        
+        # Random status based on progress
+        if progress >= 100:
+            status = "completed"
+        elif progress >= 70:
+            status = "active"
+        elif progress >= 30:
+            status = "active"
+        else:
+            status = "planning" if random.random() > 0.5 else "active"
+        
+        # Random priority
+        priority = random.choice(["high", "medium", "low"])
+        if template["category"] == "tech":
+            priority = random.choice(["high", "medium"])  # Tech projects tend to be higher priority
+        
+        # Random due date (1-60 days from now)
+        days_ahead = random.randint(7, 60)
+        if status == "completed":
+            days_ahead = random.randint(-10, -1)  # Completed projects have past due dates
+        
+        project = {
+            "id": str(uuid.uuid4()),
+            "name": template["name"],
+            "description": template["description"],
+            "status": status,
+            "priority": priority,
+            "progress": progress,
+            "due_date": datetime.utcnow() + timedelta(days=days_ahead),
+            "user_id": user_id,
+            "team_members": generate_random_team_members(user_name),
+            "created_at": datetime.utcnow() - timedelta(days=random.randint(1, 30)),
+            "updated_at": datetime.utcnow() - timedelta(hours=random.randint(1, 72))
+        }
+        projects.append(project)
+    
+    # Generate tasks (8-15 tasks)
+    num_tasks = random.randint(8, 15)
+    
+    # Select task templates
+    selected_task_templates = random.choices(TASK_TEMPLATES, k=num_tasks)
+    
+    tasks = []
+    for i, template in enumerate(selected_task_templates):
+        # Random status
+        status = random.choice(["pending", "in-progress", "completed"])
+        
+        # Assign to project (70% chance) or keep as standalone
+        project_id = None
+        if random.random() < 0.7 and projects:
+            # Try to match category
+            matching_projects = [p for p in projects if template["category"] in p["name"].lower() or template["category"] in p["description"].lower()]
+            if matching_projects:
+                project_id = random.choice(matching_projects)["id"]
+            else:
+                project_id = random.choice(projects)["id"]
+        
+        # Random due date
+        if status == "completed":
+            days_ahead = random.randint(-10, -1)
+        else:
+            days_ahead = random.randint(1, 30)
+        
+        # Generate realistic tags
+        tags = generate_task_tags(template["category"], template["title"])
+        
+        task = {
+            "id": str(uuid.uuid4()),
+            "title": template["title"],
+            "description": template["description"],
+            "status": status,
+            "priority": template["priority"],
+            "due_date": datetime.utcnow() + timedelta(days=days_ahead),
+            "user_id": user_id,
+            "project_id": project_id,
+            "tags": tags,
+            "created_at": datetime.utcnow() - timedelta(days=random.randint(1, 20)),
+            "updated_at": datetime.utcnow() - timedelta(hours=random.randint(1, 48))
+        }
+        tasks.append(task)
+    
+    return projects, tasks
+
+def generate_random_team_members(user_name: str = None):
+    """Generate random team member names."""
+    names = [
+        "Alex Johnson", "Sarah Chen", "Mike Rodriguez", "Emily Davis", 
+        "David Wilson", "Lisa Thompson", "Tom Anderson", "Maria Garcia",
+        "James Brown", "Anna Lee", "Chris Taylor", "Jessica Wang"
+    ]
+    
+    # Include user name if provided
+    if user_name and user_name not in names:
+        names.append(user_name)
+    
+    # Return 1-3 random team members
+    return random.sample(names, random.randint(1, min(3, len(names))))
+
+def generate_task_tags(category: str, title: str):
+    """Generate relevant tags for tasks."""
+    tag_pools = {
+        "tech": ["frontend", "backend", "api", "database", "security", "testing", "deployment", "optimization"],
+        "business": ["marketing", "strategy", "analysis", "planning", "client", "sales", "budget"],
+        "personal": ["productivity", "learning", "organization", "health", "networking", "skills"]
+    }
+    
+    base_tags = tag_pools.get(category, ["general"])
+    
+    # Add specific tags based on title keywords
+    title_lower = title.lower()
+    specific_tags = []
+    
+    if "design" in title_lower:
+        specific_tags.append("design")
+    if "auth" in title_lower or "login" in title_lower:
+        specific_tags.append("authentication")
+    if "database" in title_lower or "db" in title_lower:
+        specific_tags.append("database")
+    if "api" in title_lower:
+        specific_tags.append("api")
+    if "security" in title_lower:
+        specific_tags.append("security")
+    if "mobile" in title_lower:
+        specific_tags.append("mobile")
+    if "social" in title_lower:
+        specific_tags.append("social media")
+    
+    # Combine and return 2-4 tags
+    all_tags = list(set(base_tags + specific_tags))
+    return random.sample(all_tags, min(random.randint(2, 4), len(all_tags)))
+
+# Keep the old function for backward compatibility
+def generate_sample_data(user_id: str):
     
     # Sample projects
     projects = [
