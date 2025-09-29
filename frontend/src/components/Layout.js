@@ -36,14 +36,17 @@ const Layout = ({ children }) => {
   // Show loading screen while checking authentication
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 animate-fade-in-up">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Loading SmartTask AI...
+          <div className="relative">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border border-blue-400 opacity-20"></div>
+          </div>
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Loading SmartTask AI ✨
           </h2>
-          <p className="text-gray-600">
-            Setting up your workspace
+          <p className="text-gray-600 animate-pulse">
+            Setting up your workspace...
           </p>
         </div>
       </div>
