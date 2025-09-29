@@ -28,6 +28,9 @@ import {
 const Settings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { theme, toggleTheme, setTheme } = useTheme();
+  const { currentLanguage, changeLanguage, t, availableLanguages } = useLanguage();
+  const { createTestNotifications } = useNotifications();
   
   const [notifications, setNotifications] = useState({
     email: true,
