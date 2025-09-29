@@ -27,17 +27,22 @@ def create_auth_router(db: AsyncIOMotorDatabase) -> APIRouter:
         try:
             # Parse request body with detailed error logging
             body = await request.json()
-            logger.info(f"Signup request received with data: {body}")
+            logger.info(f"Signup request received with data keys: {list(body.keys())}")
             
             user_data = SignupRequest(**body)
             logger.info(f"SignupRequest validation successful for email: {user_data.email}")
             
-        except Exception as e:
-            logger.error(f"SignupRequest validation failed: {str(e)}")
-            logger.error(f"Request body: {await request.json() if hasattr(request, 'json') else 'Unable to parse body'}")
+        except ValueError as e:
+            logger.error(f"SignupRequest validation failed - ValueError: {str(e)}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid request data: {str(e)}"
+            )
+        except Exception as e:
+            logger.error(f"SignupRequest processing failed: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Request processing error: {str(e)}"
             )
         
         # Check if user already exists
