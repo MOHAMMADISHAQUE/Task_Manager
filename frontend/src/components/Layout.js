@@ -114,7 +114,7 @@ const Layout = ({ children }) => {
                   key={item.name}
                   to={item.href}
                   className={`
-                    group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer
+                    group flex items-center px-3 py-2 text-sm font-medium rounded-lg cursor-pointer
                     ${isActive(item.href)
                       ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600 shadow-sm'
                       : 'text-gray-700'
@@ -156,7 +156,7 @@ const Layout = ({ children }) => {
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={`
-                    group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer
+                    group flex items-center px-3 py-2 text-sm font-medium rounded-lg cursor-pointer
                     ${isActive(item.href)
                       ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600 shadow-sm'
                       : 'text-gray-700'
