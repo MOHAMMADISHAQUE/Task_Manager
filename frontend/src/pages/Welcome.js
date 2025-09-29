@@ -123,46 +123,70 @@ const Welcome = () => {
               
               <RadioGroup value={workspaceType} onValueChange={setWorkspaceType} className="space-y-4">
                 {/* Clean Workspace Option */}
-                <div className={`flex items-center space-x-3 p-5 rounded-lg border-2 transition-all cursor-pointer ${
-                  workspaceType === 'clean' 
-                    ? 'border-gray-400 bg-gray-50 shadow-sm' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`} onClick={() => setWorkspaceType('clean')}>
-                  <RadioGroupItem value="clean" id="clean" />
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-gray-700" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-base">Start Fresh</div>
-                      <div className="text-sm text-gray-600 mt-1 leading-relaxed">
-                        Begin with a clean workspace and create your own tasks and projects from scratch.
+                <div 
+                  className={`group relative overflow-hidden p-6 rounded-xl border-2 cursor-pointer transform transition-all duration-500 hover:scale-105 ${
+                    workspaceType === 'clean' 
+                      ? 'border-cyan-400 bg-gradient-to-r from-white/20 to-cyan-100/20 shadow-2xl shadow-cyan-500/25' 
+                      : 'border-white/30 bg-white/5 hover:border-cyan-300 hover:bg-white/10 hover:shadow-xl hover:shadow-cyan-500/10'
+                  }`} 
+                  onClick={() => setWorkspaceType('clean')}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  <div className="relative flex items-center space-x-3">
+                    <RadioGroupItem value="clean" id="clean" />
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-500 rounded-xl"></div>
+                        <div className="absolute inset-0 bg-gradient-to-tl from-white/20 to-transparent rounded-xl"></div>
+                        <CheckCircle className="relative h-6 w-6 text-white drop-shadow-lg transform group-hover:rotate-12 transition-transform duration-300" />
                       </div>
-                      <div className="text-xs text-green-600 mt-2 font-medium">
-                        Perfect for experienced users
+                      <div>
+                        <div className="font-bold text-white text-lg flex items-center gap-2">
+                          Start Fresh 
+                          <Stars className="h-4 w-4 text-cyan-400 animate-pulse" />
+                        </div>
+                        <div className="text-sm text-white/80 mt-2 leading-relaxed">
+                          Begin with a clean workspace and create your own tasks and projects from scratch.
+                        </div>
+                        <div className="text-xs text-cyan-300 mt-3 font-semibold flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                          Perfect for experienced users
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Sample Data Option */}
-                <div className={`flex items-center space-x-3 p-5 rounded-lg border-2 transition-all cursor-pointer ${
-                  workspaceType === 'sample' 
-                    ? 'border-blue-400 bg-blue-50 shadow-sm' 
-                    : 'border-gray-200 hover:border-blue-300'
-                }`} onClick={() => setWorkspaceType('sample')}>
-                  <RadioGroupItem value="sample" id="sample" />
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Zap className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-base">Explore with Sample Data</div>
-                      <div className="text-sm text-gray-600 mt-1 leading-relaxed">
-                        Get started quickly with personalized sample projects and tasks to explore all features.
+                <div 
+                  className={`group relative overflow-hidden p-6 rounded-xl border-2 cursor-pointer transform transition-all duration-500 hover:scale-105 ${
+                    workspaceType === 'sample' 
+                      ? 'border-purple-400 bg-gradient-to-r from-purple-100/20 to-pink-100/20 shadow-2xl shadow-purple-500/25' 
+                      : 'border-white/30 bg-white/5 hover:border-purple-300 hover:bg-white/10 hover:shadow-xl hover:shadow-purple-500/10'
+                  }`} 
+                  onClick={() => setWorkspaceType('sample')}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  <div className="relative flex items-center space-x-3">
+                    <RadioGroupItem value="sample" id="sample" />
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl"></div>
+                        <div className="absolute inset-0 bg-gradient-to-tl from-white/20 to-transparent rounded-xl"></div>
+                        <Zap className="relative h-6 w-6 text-white drop-shadow-lg animate-pulse transform group-hover:scale-110 transition-transform duration-300" />
                       </div>
-                      <div className="text-xs text-blue-600 mt-2 font-medium">
-                        Recommended for new users • Unique to you
+                      <div>
+                        <div className="font-bold text-white text-lg flex items-center gap-2">
+                          Explore with Sample Data 
+                          <Rocket className="h-4 w-4 text-yellow-400 animate-bounce" />
+                        </div>
+                        <div className="text-sm text-white/80 mt-2 leading-relaxed">
+                          Get started quickly with personalized sample projects and tasks to explore all features.
+                        </div>
+                        <div className="text-xs text-purple-300 mt-3 font-semibold flex items-center gap-1">
+                          <span className="w-2 h-2 bg-yellow-400 rounded-full animate-ping"></span>
+                          Recommended for new users • Unique to you
+                        </div>
                       </div>
                     </div>
                   </div>
