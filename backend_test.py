@@ -2094,6 +2094,19 @@ class AuthTestSuite:
         self.test_delete_nonexistent_notification()
         self.test_notifications_without_auth()
         
+        print("\n" + "🎯 ONBOARDING SYSTEM TESTING" + "\n" + "=" * 80)
+        
+        # Onboarding System Testing
+        self.test_clean_user_registration_no_auto_sample_data()
+        self.test_onboarding_status_check_new_user()
+        self.test_onboarding_status_check_existing_user()
+        self.test_workspace_setup_clean_workspace()
+        self.test_workspace_setup_with_sample_data()
+        self.test_personalized_sample_data_generation()
+        self.test_data_uniqueness_between_users()
+        self.test_onboarding_already_setup_user()
+        self.test_onboarding_endpoints_authentication()
+        
         # Summary
         self.print_summary()
     
