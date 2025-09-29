@@ -483,16 +483,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Profile Settings (GET/PUT /api/settings/profile)"
-    - "Notification Settings (GET/PUT /api/settings/notifications)"
-    - "Change Password (POST /api/settings/change-password)"
-    - "Security Info (GET /api/settings/security)"
-    - "Get Notifications (GET /api/notifications/)"
-    - "Unread Count (GET /api/notifications/unread-count)"
-    - "Mark Read (PUT /api/notifications/mark-read)"
-    - "Mark All Read (PUT /api/notifications/mark-all-read)"
-    - "Delete Notification (DELETE /api/notifications/{id})"
-    - "Test Notifications (POST /api/notifications/test)"
+    - "Google Signup Flow - Auth Callback Fix"
+    - "Google Login Flow - Auth Callback Fix"
+    - "Auth Callback Page Implementation"
+    - "Emergent Auth Integration - Session Processing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
