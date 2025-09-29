@@ -2324,6 +2324,15 @@ class AuthTestSuite:
         self.test_onboarding_already_setup_user()
         self.test_onboarding_endpoints_authentication()
         
+        print("\n" + "🔧 EMERGENT AUTH FIX TESTING" + "\n" + "=" * 80)
+        
+        # Emergent Auth Fix Testing - Focus on 401 error resolution
+        self.test_emergent_auth_callback_session_generation()
+        self.test_emergent_auth_me_endpoint_after_callback()
+        self.test_notification_endpoints_with_auth()
+        self.test_session_validation_consistency()
+        self.test_emergent_auth_callback_local_token_storage()
+        
         # Summary
         self.print_summary()
     
