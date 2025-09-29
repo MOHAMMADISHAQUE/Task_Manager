@@ -356,6 +356,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ Emergent Auth callback endpoint tested successfully: correctly validates required session_id field (422 for missing), properly rejects invalid session IDs (400), endpoint structure and request validation working as expected. Account linking functionality implemented."
+        - working: true
+          agent: "testing"
+          comment: "✅ EMERGENT AUTH 401 FIX VERIFIED: Callback endpoint now generates LOCAL session tokens instead of using external ones. Session token generation and storage working correctly. All protected endpoints (/api/auth/me, /api/notifications/*) now accessible with proper authentication - 401 errors RESOLVED. Session validation consistent across all protected routes."
 
   - task: "Session Management & Security"
     implemented: true
