@@ -51,6 +51,7 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
     def get_llm_chat():
         """Initialize LLM chat with GPT-5"""
         if not AI_AVAILABLE:
+            logger.error("AI_AVAILABLE is False - emergentintegrations not imported")
             return None
             
         api_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -58,11 +59,17 @@ def create_ai_router(db: AsyncIOMotorDatabase) -> APIRouter:
             logger.error("EMERGENT_LLM_KEY not found in environment")
             return None
             
-        return LlmChat(
-            api_key=api_key,
-            session_id="smarttask-ai",
-            system_message="You are an intelligent task management assistant with access to web resources."
-        ).with_model("openai", "gpt-5")
+        try:
+            chat = LlmChat(
+                api_key=api_key,
+                session_id="smarttask-ai",
+                system_message="You are an intelligent task management assistant with access to web resources."
+            ).with_model("openai", "gpt-5")
+            logger.info("GPT-5 chat initialized successfully")
+            return chat
+        except Exception as e:
+            logger.error(f"Failed to initialize GPT-5 chat: {e}")
+            return None
     
     def get_web_search():
         """Initialize web search for finding external resources"""
