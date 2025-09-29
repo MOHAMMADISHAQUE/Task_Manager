@@ -566,10 +566,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Google Signup Flow - Auth Callback Fix"
-    - "Google Login Flow - Auth Callback Fix"
-    - "Auth Callback Page Implementation"
-    - "Emergent Auth Integration - Session Processing"
+    - "Clean User Registration - No Auto Sample Data"
+    - "Onboarding Status Check (GET /api/onboarding/status)"
+    - "Workspace Setup (POST /api/onboarding/setup)"
+    - "Personalized Sample Data Generation"
+    - "Data Uniqueness Between Users"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -589,3 +590,5 @@ agent_communication:
       message: "🔄 EMERGENT AUTH TESTING INITIATED: Starting comprehensive testing of fixed Google signup/login flow. Will test signup flow from /signup page, login flow from /login page, auth callback page functionality, and error handling scenarios. Focus on verifying the fix prevents redirect loops back to signin page and ensures proper completion to dashboard."
     - agent: "testing"
       message: "✅ EMERGENT AUTH TESTING COMPLETE: All 4 auth flow components tested successfully with 100% pass rate. Google signup/login buttons correctly redirect to Emergent Auth service with proper callback URL encoding. Auth callback page processes session_id from URL hash and handles both valid/invalid sessions appropriately. Error handling works with proper toast notifications. The reported issue 'sign up with google takes me back to the sign in page' has been RESOLVED - no more redirect loops. The fix successfully implements dedicated /auth/callback processing instead of dashboard auth handling."
+    - agent: "testing"
+      message: "🎯 PERSONALIZED ONBOARDING SYSTEM TESTING COMPLETE: All 6 new onboarding features tested successfully with 100% pass rate (58/58 total tests passed). ✅ Clean User Registration: New users start with completely clean workspace, no automatic sample data creation. ✅ Onboarding Status Check: Correctly detects onboarded vs new users based on tasks/projects/settings. ✅ Workspace Setup: Users can choose clean workspace or personalized sample data via POST /api/onboarding/setup. ✅ Personalized Sample Data: When requested, creates 3-5 randomized projects and 8-15 diverse tasks with user's name included in team members. ✅ Data Uniqueness: Multiple users get different sample data combinations (tested <80% overlap). ✅ Authentication: All endpoints properly protected. The reported UX issue of identical mock data has been RESOLVED - each user now gets a unique, personalized workspace experience."
