@@ -72,7 +72,7 @@
           comment: "Fixed Google login flow to use new auth callback page instead of processing auth on protected dashboard page. Should complete authentication and land on dashboard."
         - working: true
           agent: "testing"
-          comment: "✅ Google login flow tested successfully: Login page loads properly with Google button, clicking 'Continue with Google' correctly redirects to Emergent Auth service with callback URL properly encoded as https://taskmaster-ai-16.preview.emergentagent.com/auth/callback. No more redirect loops to signin page. Button styling and functionality working correctly."
+          comment: "✅ Google login flow tested successfully: Login page loads properly with Google button, clicking 'Continue with Google' correctly redirects to Emergent Auth service with callback URL properly encoded as https://taskmanager-ai.preview.emergentagent.com/auth/callback. No more redirect loops to signin page. Button styling and functionality working correctly."
 
   - task: "Auth Callback Page Implementation"
     implemented: true
