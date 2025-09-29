@@ -1560,8 +1560,8 @@ class AuthTestSuite:
                 tasks_response = self.session.get(f"{BASE_URL}/tasks")
                 
                 if projects_response.status_code == 200 and tasks_response.status_code == 200:
-                    projects = projects_response.json().get("projects", [])
-                    tasks = tasks_response.json().get("tasks", [])
+                    projects = projects_response.json()  # API returns list directly
+                    tasks = tasks_response.json()  # API returns list directly
                     
                     # Extract key data for comparison
                     project_names = [p.get("name") for p in projects]
