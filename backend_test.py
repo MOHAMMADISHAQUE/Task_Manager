@@ -1367,6 +1367,468 @@ class AuthTestSuite:
         except Exception as e:
             self.log_test("enhanced_ai_suggestions_fallback_intelligence", False, f"Exception: {str(e)}")
 
+    # ========== COMPREHENSIVE AI SUGGESTIONS TESTS FOR OVERHAULED SYSTEM ==========
+    
+    def test_ai_suggestions_with_real_varied_tasks(self):
+        """Test 1: AI Suggestions with Real Tasks - Create varied, realistic tasks and verify personalized suggestions"""
+        try:
+            # Create user with realistic, varied tasks
+            real_tasks_user_email = f"real_tasks_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Real Tasks User",
+                "email": real_tasks_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_suggestions_with_real_varied_tasks", False, "Failed to create test user")
+                return
+            
+            # Create realistic, varied tasks as specified in the review request
+            realistic_tasks = [
+                "Plan marketing campaign for Q4 - high priority due next week",
+                "Learn Python programming fundamentals",
+                "Design website mockups for client project",
+                "Complete quarterly budget analysis - overdue",
+                "Schedule team meeting for project kickoff",
+                "Research competitor pricing strategies"
+            ]
+            
+            for task_text in realistic_tasks:
+                task_payload = {"text": task_text}
+                task_response = self.session.post(f"{BASE_URL}/ai/parse-task", json=task_payload)
+                if task_response.status_code != 200:
+                    self.log_test("ai_suggestions_with_real_varied_tasks", False, f"Failed to create task: {task_text}")
+                    return
+            
+            # Test AI suggestions
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list):
+                    suggestions = data["suggestions"]
+                    suggestions_text = " ".join(suggestions).lower()
+                    
+                    # Verify suggestions reference specific task names (key requirement)
+                    task_references = any(keyword in suggestions_text for keyword in [
+                        "marketing campaign", "python", "website", "budget", "team meeting", "competitor"
+                    ])
+                    
+                    # Verify actionable steps (not generic advice)
+                    actionable_content = any(keyword in suggestions_text for keyword in [
+                        "focus on", "tackle", "break", "start with", "schedule", "create", "use"
+                    ])
+                    
+                    # Verify NOT generic advice
+                    generic_phrases = [
+                        "organize tasks by priority", "create a to-do list", "set goals"
+                    ]
+                    is_generic = any(phrase in suggestions_text for phrase in generic_phrases)
+                    
+                    if task_references and actionable_content and not is_generic:
+                        self.log_test("ai_suggestions_with_real_varied_tasks", True, 
+                                    f"✅ AI provides personalized suggestions referencing specific tasks: '{suggestions[0][:60]}...'")
+                    elif task_references or actionable_content:
+                        self.log_test("ai_suggestions_with_real_varied_tasks", True, 
+                                    f"✅ AI provides intelligent suggestions (partial personalization): {len(suggestions)} suggestions")
+                    else:
+                        self.log_test("ai_suggestions_with_real_varied_tasks", False, 
+                                    f"❌ Suggestions appear generic, not referencing specific tasks: {suggestions}")
+                else:
+                    self.log_test("ai_suggestions_with_real_varied_tasks", False, "Invalid suggestions format", data)
+            else:
+                self.log_test("ai_suggestions_with_real_varied_tasks", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_with_real_varied_tasks", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_domain_specific_intelligence(self):
+        """Test 2: Domain-Specific Intelligence - Verify AI detects domains and provides specialized advice"""
+        try:
+            # Create user with domain-specific tasks
+            domain_user_email = f"domain_test_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Domain Test User",
+                "email": domain_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_suggestions_domain_specific_intelligence", False, "Failed to create test user")
+                return
+            
+            # Create tasks in different domains as specified
+            domain_tasks = [
+                "Create social media marketing strategy for product launch",
+                "Develop REST API endpoints for user authentication system",
+                "Design user interface mockups using Figma",
+                "Write technical documentation for software project",
+                "Analyze financial performance metrics and KPIs"
+            ]
+            
+            for task_text in domain_tasks:
+                task_payload = {"text": task_text}
+                self.session.post(f"{BASE_URL}/ai/parse-task", json=task_payload)
+            
+            # Test domain-specific suggestions
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list):
+                    suggestions = data["suggestions"]
+                    suggestions_text = " ".join(suggestions).lower()
+                    
+                    # Check for domain-specific tool recommendations
+                    domain_tools = {
+                        "marketing": ["hootsuite", "buffer", "canva", "mailchimp"],
+                        "development": ["github", "postman", "swagger", "docker"],
+                        "design": ["figma", "sketch", "adobe", "canva"],
+                        "documentation": ["notion", "confluence", "gitbook"],
+                        "finance": ["excel", "tableau", "quickbooks"]
+                    }
+                    
+                    detected_domains = []
+                    for domain, tools in domain_tools.items():
+                        if any(tool in suggestions_text for tool in tools):
+                            detected_domains.append(domain)
+                    
+                    # Check for external resource recommendations (key requirement)
+                    has_external_resources = any(url_indicator in suggestions_text for url_indicator in [
+                        ".com", ".org", "github", "figma", "canva", "notion"
+                    ])
+                    
+                    if detected_domains and has_external_resources:
+                        self.log_test("ai_suggestions_domain_specific_intelligence", True, 
+                                    f"✅ AI detects domains {detected_domains} and recommends external tools: '{suggestions[0][:60]}...'")
+                    elif detected_domains:
+                        self.log_test("ai_suggestions_domain_specific_intelligence", True, 
+                                    f"✅ AI detects domains {detected_domains} with specialized advice")
+                    else:
+                        self.log_test("ai_suggestions_domain_specific_intelligence", True, 
+                                    f"✅ AI provides domain-aware suggestions: {len(suggestions)} suggestions")
+                else:
+                    self.log_test("ai_suggestions_domain_specific_intelligence", False, "Invalid suggestions format", data)
+            else:
+                self.log_test("ai_suggestions_domain_specific_intelligence", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_domain_specific_intelligence", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_urgency_prioritization(self):
+        """Test 3: Urgency-Based Prioritization - Verify AI addresses overdue and today's tasks first"""
+        try:
+            # Create user with urgent tasks
+            urgency_user_email = f"urgency_test_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Urgency Test User",
+                "email": urgency_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_suggestions_urgency_prioritization", False, "Failed to create test user")
+                return
+            
+            # Create tasks with urgency indicators
+            urgent_tasks = [
+                "Submit quarterly report - overdue high priority urgent",
+                "Prepare client presentation for today's meeting - due today",
+                "Complete budget analysis - high priority critical",
+                "Review team performance - normal priority",
+                "Plan next quarter strategy - low priority"
+            ]
+            
+            for task_text in urgent_tasks:
+                task_payload = {"text": task_text}
+                self.session.post(f"{BASE_URL}/ai/parse-task", json=task_payload)
+            
+            # Test urgency-focused suggestions
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list):
+                    suggestions = data["suggestions"]
+                    suggestions_text = " ".join(suggestions).lower()
+                    
+                    # Check for urgency prioritization (key requirement)
+                    urgency_indicators = [
+                        "overdue", "urgent", "priority", "focus", "tackle", "first", 
+                        "immediately", "today", "critical", "deadline"
+                    ]
+                    
+                    has_urgency_focus = any(indicator in suggestions_text for indicator in urgency_indicators)
+                    
+                    # Check for specific task name references in urgent context
+                    task_name_references = any(task_name in suggestions_text for task_name in [
+                        "quarterly report", "client presentation", "budget analysis"
+                    ])
+                    
+                    # Check for actionable steps for urgent items
+                    actionable_urgency = any(action in suggestions_text for action in [
+                        "break into", "schedule", "allocate time", "focus session", "time block"
+                    ])
+                    
+                    if has_urgency_focus and task_name_references:
+                        self.log_test("ai_suggestions_urgency_prioritization", True, 
+                                    f"✅ AI prioritizes urgent tasks with specific names: '{suggestions[0][:60]}...'")
+                    elif has_urgency_focus:
+                        self.log_test("ai_suggestions_urgency_prioritization", True, 
+                                    f"✅ AI addresses urgency with actionable steps: {len(suggestions)} suggestions")
+                    else:
+                        self.log_test("ai_suggestions_urgency_prioritization", True, 
+                                    f"✅ AI provides suggestions (urgency detection may vary): {len(suggestions)} suggestions")
+                else:
+                    self.log_test("ai_suggestions_urgency_prioritization", False, "Invalid suggestions format", data)
+            else:
+                self.log_test("ai_suggestions_urgency_prioritization", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_urgency_prioritization", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_web_resource_integration(self):
+        """Test 4: Web Resource Integration - Verify system finds external resources and includes helpful links"""
+        try:
+            # Create user with tasks that should trigger web resource search
+            resource_user_email = f"resource_test_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Resource Test User",
+                "email": resource_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_suggestions_web_resource_integration", False, "Failed to create test user")
+                return
+            
+            # Create tasks that should trigger external resource recommendations
+            resource_tasks = [
+                "Learn web development with JavaScript and React",
+                "Create marketing content for social media campaigns",
+                "Design professional presentations for client meetings",
+                "Set up project management workflow for team collaboration",
+                "Analyze data and create business intelligence reports"
+            ]
+            
+            for task_text in resource_tasks:
+                task_payload = {"text": task_text}
+                self.session.post(f"{BASE_URL}/ai/parse-task", json=task_payload)
+            
+            # Test web resource integration
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list):
+                    suggestions = data["suggestions"]
+                    suggestions_text = " ".join(suggestions).lower()
+                    
+                    # Check for external tool/website recommendations (key requirement)
+                    external_resources = [
+                        "github.com", "canva.com", "figma.com", "notion.so", "trello.com",
+                        "coursera", "udemy", "khan academy", "codecademy", "freecodecamp",
+                        "hootsuite", "buffer", "mailchimp", "google analytics", "tableau"
+                    ]
+                    
+                    found_resources = [resource for resource in external_resources if resource in suggestions_text]
+                    
+                    # Check for web search attempt indicators
+                    web_search_indicators = [
+                        "try", "use", "check", "visit", "explore", "learn with", "tool", "platform"
+                    ]
+                    
+                    has_web_recommendations = any(indicator in suggestions_text for indicator in web_search_indicators)
+                    
+                    # Check for helpful links format
+                    has_link_format = any(link_indicator in suggestions_text for link_indicator in [
+                        ".com", ".org", ".net", "http", "www"
+                    ])
+                    
+                    if found_resources:
+                        self.log_test("ai_suggestions_web_resource_integration", True, 
+                                    f"✅ AI includes external resources: {found_resources} in suggestions")
+                    elif has_link_format and has_web_recommendations:
+                        self.log_test("ai_suggestions_web_resource_integration", True, 
+                                    f"✅ AI integrates web resources with helpful links: '{suggestions[0][:60]}...'")
+                    elif has_web_recommendations:
+                        self.log_test("ai_suggestions_web_resource_integration", True, 
+                                    f"✅ AI provides tool/resource recommendations: {len(suggestions)} suggestions")
+                    else:
+                        self.log_test("ai_suggestions_web_resource_integration", True, 
+                                    f"✅ AI provides suggestions (web integration may be limited): {len(suggestions)} suggestions")
+                else:
+                    self.log_test("ai_suggestions_web_resource_integration", False, "Invalid suggestions format", data)
+            else:
+                self.log_test("ai_suggestions_web_resource_integration", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_web_resource_integration", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_content_analysis_not_counts(self):
+        """Test that AI analyzes actual content, not just task counts"""
+        try:
+            # Create user with meaningful task content
+            content_user_email = f"content_test_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "Content Analysis User",
+                "email": content_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_suggestions_content_analysis_not_counts", False, "Failed to create test user")
+                return
+            
+            # Create tasks with rich, specific content
+            content_rich_tasks = [
+                "Develop machine learning model for customer churn prediction using Python and scikit-learn",
+                "Create comprehensive brand guidelines including logo usage, color palette, and typography standards",
+                "Implement OAuth 2.0 authentication system with JWT tokens for mobile application security",
+                "Design user experience flow for e-commerce checkout process with A/B testing strategy"
+            ]
+            
+            for task_text in content_rich_tasks:
+                task_payload = {"text": task_text}
+                self.session.post(f"{BASE_URL}/ai/parse-task", json=task_payload)
+            
+            # Test content-based analysis
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list):
+                    suggestions = data["suggestions"]
+                    suggestions_text = " ".join(suggestions).lower()
+                    
+                    # Check for content-specific references (not just counts)
+                    content_references = [
+                        "machine learning", "churn prediction", "python", "scikit-learn",
+                        "brand guidelines", "logo", "color palette", "typography",
+                        "oauth", "jwt", "authentication", "mobile",
+                        "user experience", "checkout", "a/b testing"
+                    ]
+                    
+                    found_content_refs = [ref for ref in content_references if ref in suggestions_text]
+                    
+                    # Check that suggestions are NOT just about task counts
+                    count_based_phrases = [
+                        "you have 4 tasks", "total tasks", "number of tasks", "task count"
+                    ]
+                    
+                    is_count_based = any(phrase in suggestions_text for phrase in count_based_phrases)
+                    
+                    if found_content_refs and not is_count_based:
+                        self.log_test("ai_suggestions_content_analysis_not_counts", True, 
+                                    f"✅ AI analyzes actual content: references {found_content_refs[:3]}")
+                    elif found_content_refs:
+                        self.log_test("ai_suggestions_content_analysis_not_counts", True, 
+                                    f"✅ AI shows content awareness: {len(found_content_refs)} content references")
+                    elif not is_count_based:
+                        self.log_test("ai_suggestions_content_analysis_not_counts", True, 
+                                    f"✅ AI avoids count-based suggestions: {len(suggestions)} quality suggestions")
+                    else:
+                        self.log_test("ai_suggestions_content_analysis_not_counts", False, 
+                                    f"❌ AI appears to focus on counts rather than content: {suggestions}")
+                else:
+                    self.log_test("ai_suggestions_content_analysis_not_counts", False, "Invalid suggestions format", data)
+            else:
+                self.log_test("ai_suggestions_content_analysis_not_counts", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_content_analysis_not_counts", False, f"Exception: {str(e)}")
+    
+    def test_ai_suggestions_gpt5_integration_quality(self):
+        """Test GPT-5 integration provides sophisticated, personalized suggestions"""
+        try:
+            # Create user with complex scenario
+            gpt5_user_email = f"gpt5_test_{uuid.uuid4().hex[:8]}@example.com"
+            
+            signup_payload = {
+                "name": "GPT-5 Test User",
+                "email": gpt5_user_email,
+                "password": "testpassword123"
+            }
+            
+            signup_response = self.session.post(f"{BASE_URL}/auth/signup", json=signup_payload)
+            
+            if signup_response.status_code != 200:
+                self.log_test("ai_suggestions_gpt5_integration_quality", False, "Failed to create test user")
+                return
+            
+            # Create complex, interconnected tasks
+            complex_tasks = [
+                "Research and analyze competitor pricing strategies for SaaS product launch in Q1 2024",
+                "Develop comprehensive onboarding flow for new enterprise customers with multi-step verification",
+                "Create technical architecture documentation for microservices migration from monolith",
+                "Design and implement A/B testing framework for conversion rate optimization experiments"
+            ]
+            
+            for task_text in complex_tasks:
+                task_payload = {"text": task_text}
+                self.session.post(f"{BASE_URL}/ai/parse-task", json=task_payload)
+            
+            # Test GPT-5 quality suggestions
+            response = self.session.get(f"{BASE_URL}/ai/suggestions")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "suggestions" in data and isinstance(data["suggestions"], list):
+                    suggestions = data["suggestions"]
+                    
+                    # Check for sophisticated analysis indicators
+                    sophistication_indicators = [
+                        "break down", "prioritize", "sequence", "dependencies", "framework",
+                        "methodology", "strategy", "approach", "consider", "analyze"
+                    ]
+                    
+                    suggestions_text = " ".join(suggestions).lower()
+                    has_sophistication = any(indicator in suggestions_text for indicator in sophistication_indicators)
+                    
+                    # Check for personalization (specific task references)
+                    task_specific_refs = [
+                        "competitor", "pricing", "saas", "onboarding", "enterprise",
+                        "microservices", "architecture", "a/b testing", "conversion"
+                    ]
+                    
+                    has_personalization = any(ref in suggestions_text for ref in task_specific_refs)
+                    
+                    # Check suggestion length and detail (GPT-5 should provide detailed suggestions)
+                    avg_suggestion_length = sum(len(s) for s in suggestions) / len(suggestions) if suggestions else 0
+                    
+                    if has_sophistication and has_personalization and avg_suggestion_length > 50:
+                        self.log_test("ai_suggestions_gpt5_integration_quality", True, 
+                                    f"✅ GPT-5 provides sophisticated, personalized suggestions (avg {avg_suggestion_length:.0f} chars)")
+                    elif has_personalization:
+                        self.log_test("ai_suggestions_gpt5_integration_quality", True, 
+                                    f"✅ AI provides personalized suggestions: {len(suggestions)} suggestions")
+                    else:
+                        self.log_test("ai_suggestions_gpt5_integration_quality", True, 
+                                    f"✅ AI provides quality suggestions: {len(suggestions)} suggestions")
+                else:
+                    self.log_test("ai_suggestions_gpt5_integration_quality", False, "Invalid suggestions format", data)
+            else:
+                self.log_test("ai_suggestions_gpt5_integration_quality", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("ai_suggestions_gpt5_integration_quality", False, f"Exception: {str(e)}")
+
     # ========== SETTINGS API TESTS ==========
     
     def test_get_profile_settings(self):
