@@ -401,38 +401,49 @@ const Settings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
-            Appearance
+            {t('settings.appearance')}
           </CardTitle>
-          <CardDescription>Customize the look and feel of your workspace.</CardDescription>
+          <CardDescription>Customize your interface preferences</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Theme</Label>
-              <Select defaultValue="light">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="theme" className="text-sm font-medium">
+                {t('settings.theme')}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={theme === 'light' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTheme('light')}
+                  className="px-3 py-1"
+                >
+                  ☀️ Light
+                </Button>
+                <Button
+                  variant={theme === 'dark' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTheme('dark')}
+                  className="px-3 py-1"
+                >
+                  🌙 Dark
+                </Button>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label>Language</Label>
-              <Select value={profile.language} onValueChange={(value) => handleProfileChange('language', value)}>
-                <SelectTrigger>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="language" className="text-sm font-medium">
+                {t('settings.language')}
+              </Label>
+              <Select value={currentLanguage} onValueChange={changeLanguage}>
+                <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="Spanish">Spanish</SelectItem>
-                  <SelectItem value="French">French</SelectItem>
-                  <SelectItem value="German">German</SelectItem>
-                  <SelectItem value="Japanese">Japanese</SelectItem>
+                  {availableLanguages.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.flag} {lang.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
