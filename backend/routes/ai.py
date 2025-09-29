@@ -14,13 +14,19 @@ load_dotenv()
 
 try:
     from emergentintegrations.llm.chat import LlmChat, UserMessage
-    from emergentintegrations.web.search import WebSearch
     AI_AVAILABLE = True
-    WEB_SEARCH_AVAILABLE = True
+    logger.info("emergentintegrations.llm.chat imported successfully")
+    try:
+        from emergentintegrations.web.search import WebSearch
+        WEB_SEARCH_AVAILABLE = True
+        logger.info("emergentintegrations.web.search imported successfully")
+    except ImportError:
+        WEB_SEARCH_AVAILABLE = False
+        logger.warning("emergentintegrations.web.search not available, continuing without web search")
 except ImportError:
     AI_AVAILABLE = False
     WEB_SEARCH_AVAILABLE = False
-    logging.warning("emergentintegrations not available, using mock responses")
+    logger.error("emergentintegrations not available, using fallback responses")
 
 from auth.dependencies import get_current_user
 from models.tasks import Task
