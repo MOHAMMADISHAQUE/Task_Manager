@@ -197,7 +197,7 @@ const Dashboard = () => {
             <AlertCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.overdueTasks}</div>
+            <div className="text-xl sm:text-2xl font-bold text-red-600 hover:animate-pulse transition-all">{stats.overdueTasks}</div>
             <p className="text-xs text-gray-600 leading-tight">
               {stats.overdueTasks > 0 ? 'Need immediate attention' : 'All tasks on track'}
             </p>
