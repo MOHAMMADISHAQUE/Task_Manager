@@ -70,6 +70,7 @@ projects_router = create_projects_router(db)
 ai_router = create_ai_router(db)
 settings_router = create_settings_router(db)
 notifications_router = create_notifications_router(db)
+onboarding_router = create_onboarding_router(db)
 
 api_router.include_router(auth_router)
 api_router.include_router(emergent_auth_router)
@@ -78,6 +79,7 @@ api_router.include_router(projects_router)
 api_router.include_router(ai_router)
 api_router.include_router(settings_router)
 api_router.include_router(notifications_router)
+api_router.include_router(onboarding_router)
 
 # Include the router in the main app
 app.include_router(api_router)
