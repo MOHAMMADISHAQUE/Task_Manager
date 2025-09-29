@@ -12,6 +12,11 @@ from pydantic import BaseModel
 # Load environment variables
 load_dotenv()
 
+import logging
+
+# Set up logger first
+logger = logging.getLogger(__name__)
+
 try:
     from emergentintegrations.llm.chat import LlmChat, UserMessage
     AI_AVAILABLE = True
