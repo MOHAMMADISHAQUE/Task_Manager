@@ -79,45 +79,49 @@ const Welcome = () => {
               
               <RadioGroup value={workspaceType} onValueChange={setWorkspaceType} className="space-y-4">
                 {/* Clean Workspace Option */}
-                <div className="flex items-center space-x-3 p-4 rounded-lg border-2 hover:border-gray-300 transition-colors">
+                <div className={`flex items-center space-x-3 p-5 rounded-lg border-2 transition-all cursor-pointer ${
+                  workspaceType === 'clean' 
+                    ? 'border-gray-400 bg-gray-50 shadow-sm' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`} onClick={() => setWorkspaceType('clean')}>
                   <RadioGroupItem value="clean" id="clean" />
-                  <Label htmlFor="clean" className="flex-1 cursor-pointer">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mt-1">
-                        <CheckCircle className="h-4 w-4 text-gray-600" />
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="h-5 w-5 text-gray-700" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900 text-base">Start Fresh</div>
+                      <div className="text-sm text-gray-600 mt-1 leading-relaxed">
+                        Begin with a clean workspace and create your own tasks and projects from scratch.
                       </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Start Fresh</div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          Begin with a clean workspace and create your own tasks and projects from scratch.
-                        </div>
-                        <div className="text-xs text-green-600 mt-2 font-medium">
-                          Perfect for experienced users
-                        </div>
+                      <div className="text-xs text-green-600 mt-2 font-medium">
+                        Perfect for experienced users
                       </div>
                     </div>
-                  </Label>
+                  </div>
                 </div>
 
                 {/* Sample Data Option */}
-                <div className="flex items-center space-x-3 p-4 rounded-lg border-2 hover:border-blue-300 transition-colors">
+                <div className={`flex items-center space-x-3 p-5 rounded-lg border-2 transition-all cursor-pointer ${
+                  workspaceType === 'sample' 
+                    ? 'border-blue-400 bg-blue-50 shadow-sm' 
+                    : 'border-gray-200 hover:border-blue-300'
+                }`} onClick={() => setWorkspaceType('sample')}>
                   <RadioGroupItem value="sample" id="sample" />
-                  <Label htmlFor="sample" className="flex-1 cursor-pointer">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mt-1">
-                        <Zap className="h-4 w-4 text-blue-600" />
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Zap className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900 text-base">Explore with Sample Data</div>
+                      <div className="text-sm text-gray-600 mt-1 leading-relaxed">
+                        Get started quickly with personalized sample projects and tasks to explore all features.
                       </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Explore with Sample Data</div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          Get started quickly with personalized sample projects and tasks to explore all features.
-                        </div>
-                        <div className="text-xs text-blue-600 mt-2 font-medium">
-                          Recommended for new users • Unique to you
-                        </div>
+                      <div className="text-xs text-blue-600 mt-2 font-medium">
+                        Recommended for new users • Unique to you
                       </div>
                     </div>
-                  </Label>
+                  </div>
                 </div>
               </RadioGroup>
             </div>
