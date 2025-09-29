@@ -198,12 +198,15 @@ const Tasks = () => {
       </div>
 
       {/* Smart Input Box */}
-      <Card className="border-2 border-dashed border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
-        <CardContent className="p-4 sm:p-6">
+      <Card className="relative overflow-hidden border-2 border-dashed border-blue-200 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 hover:shadow-xl transition-all duration-500 transform hover:scale-[1.02] animate-fade-in-up">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 via-purple-400/10 to-pink-400/10 animate-pulse"></div>
+        <CardContent className="relative p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-5 w-5 text-blue-600" />
+            <Sparkles className="h-5 w-5 text-blue-600 animate-spin-slow" />
             <h3 className="font-semibold text-gray-900">Smart Task Creator</h3>
-            <Badge variant="secondary" className="text-xs">AI Powered</Badge>
+            <Badge variant="secondary" className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white animate-pulse">
+              ✨ AI Powered
+            </Badge>
           </div>
           <p className="text-sm text-gray-600 mb-4">
             Type naturally: "Call John tomorrow at 3 PM" or "Finish report next Friday"
