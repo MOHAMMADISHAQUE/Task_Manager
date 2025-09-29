@@ -379,7 +379,14 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-between items-center mt-6">
+            <Button 
+              onClick={createTestNotifications}
+              variant="outline"
+              className="text-purple-600 border-purple-600 hover:bg-purple-50"
+            >
+              🔔 Test Notifications
+            </Button>
             <Button 
               onClick={saveNotifications}
               disabled={saving || loading}
