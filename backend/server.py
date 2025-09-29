@@ -17,6 +17,7 @@ from routes.emergent_auth import create_emergent_auth_router
 from routes.ai import create_ai_router
 from routes.settings import create_settings_router
 from routes.notifications import create_notifications_router
+from routes.onboarding import create_onboarding_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
