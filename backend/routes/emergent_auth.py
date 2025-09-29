@@ -108,8 +108,8 @@ def create_emergent_auth_router(db: AsyncIOMotorDatabase) -> APIRouter:
         # Get updated user data
         user_doc = await db.users.find_one({"id": user_id})
         
-        # Create session with the emergent session token for validation
-        session_token = user_data["session_token"]
+        # Create session with a local session token for validation
+        session_token = generate_session_token()
         hashed_session_token = hash_token(session_token)
         
         session = Session(
