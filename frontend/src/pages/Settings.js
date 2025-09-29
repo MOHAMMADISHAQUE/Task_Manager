@@ -259,14 +259,14 @@ const Settings = () => {
           </CardTitle>
           <CardDescription>Update your personal information and profile details.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-6">
           {/* Avatar */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 pb-2">
             <Avatar className="h-20 w-20">
               <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="relative">
                 <input
                   type="file"
@@ -289,31 +289,33 @@ const Settings = () => {
             </div>
           </div>
 
+          <Separator />
+
           {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
               <Input
                 id="name"
                 value={profile.name}
                 onChange={(e) => handleProfileChange('name', e.target.value)}
                 disabled={loading}
-                className="h-10"
+                className="h-11"
               />
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 value={profile.email}
                 disabled
-                className="bg-gray-50 dark:bg-gray-800 h-10"
+                className="bg-gray-50 dark:bg-gray-800 h-11"
               />
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label htmlFor="role" className="text-sm font-medium">Role</Label>
               <Input
                 id="role"
@@ -321,14 +323,14 @@ const Settings = () => {
                 onChange={(e) => handleProfileChange('role', e.target.value)}
                 placeholder="e.g. Product Manager"
                 disabled={loading}
-                className="h-10"
+                className="h-11"
               />
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label htmlFor="timezone" className="text-sm font-medium">Timezone</Label>
               <Select value={profile.timezone} onValueChange={(value) => handleProfileChange('timezone', value)}>
-                <SelectTrigger className="h-10">
+                <SelectTrigger className="h-11">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
