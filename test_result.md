@@ -163,9 +163,80 @@ backend:
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the fixed Emergent Auth (Google signup/login) flow for SmartTask AI - User reports that 'sign up with google takes me back to the sign in page' instead of completing signup. I've implemented a fix with a dedicated auth callback page."
+user_problem_statement: "Test the new Personalized Onboarding System for SmartTask AI - All new users were getting identical mock data (same projects and tasks), poor UX - users thought they were seeing someone else's data, no personalization or choice for new users. New features include clean user registration with no auto sample data, onboarding status check, workspace setup with choice, personalized sample data generation, and data uniqueness between users."
 
 backend:
+  - task: "Clean User Registration - No Auto Sample Data"
+    implemented: true
+    working: true
+    file: "/app/backend/auth_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Clean user registration tested successfully: New user signup creates completely clean workspace with no automatic sample data. Onboarding status correctly shows onboarded=false, tasks_count=0, projects_count=0. Users start with empty workspace as intended."
+
+  - task: "Onboarding Status Check (GET /api/onboarding/status)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/onboarding.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Onboarding status check tested successfully: Correctly detects if user has been onboarded by checking tasks/projects/settings. Returns onboarded=false for brand new users and onboarded=true for users with existing data. All required fields (onboarded, tasks_count, projects_count, has_settings) present in response."
+
+  - task: "Workspace Setup (POST /api/onboarding/setup)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/onboarding.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Workspace setup tested successfully: Allows users to choose between clean workspace (add_sample_data=false) or sample data (add_sample_data=true). Clean workspace setup returns 0 projects/tasks with appropriate message. Sample data setup creates 3-5 projects and 8-15 tasks. Prevents re-onboarding for users who already have data."
+
+  - task: "Personalized Sample Data Generation"
+    implemented: true
+    working: true
+    file: "/app/backend/seed_data.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Personalized sample data generation tested successfully: When add_sample_data=true, creates randomized and personalized sample data. Projects are randomized from template pool (3-5 projects), tasks are diverse (8-15 tasks), priorities/statuses/due dates are randomized, team member names include user's name when available, and tags are relevant and varied."
+
+  - task: "Data Uniqueness Between Users"
+    implemented: true
+    working: true
+    file: "/app/backend/seed_data.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Data uniqueness tested successfully: Multiple users get different sample data combinations. Tested two users with significant differences - overlap ratios kept under 80% for both projects and tasks. Each user's workspace feels personalized and unique. No more identical mock data across users."
+
+  - task: "Authentication Protection on Onboarding Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/onboarding.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Authentication protection tested successfully: All onboarding endpoints (GET /api/onboarding/status, POST /api/onboarding/setup) properly require authentication and return 401 for unauthenticated requests."
   - task: "User Registration (POST /api/auth/signup)"
     implemented: true
     working: true
