@@ -113,10 +113,12 @@ const Welcome = () => {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-4 text-gray-900">
-                How would you like to start?
+          <CardContent className="space-y-8 relative">
+            <div className={`transform transition-all duration-700 ${
+              mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`} style={{ animationDelay: '400ms' }}>
+              <h3 className="font-bold text-xl mb-6 text-white text-center">
+                🚀 How would you like to start your <span className="text-transparent bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text">journey</span>?
               </h3>
               
               <RadioGroup value={workspaceType} onValueChange={setWorkspaceType} className="space-y-4">
