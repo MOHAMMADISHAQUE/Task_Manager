@@ -102,12 +102,8 @@ def create_emergent_auth_router(db: AsyncIOMotorDatabase) -> APIRouter:
             user_id = user.id
             is_new_user = True
             
-            # Initialize new user with sample data
-            try:
-                await initialize_new_user(user_id)
-                logger.info(f"Sample data created for new Emergent user: {user_id}")
-            except Exception as e:
-                logger.error(f"Failed to create sample data for user {user_id}: {e}")
+            # User starts with clean workspace - no automatic sample data
+            logger.info(f"New Emergent user {user_id} created with clean workspace")
         
         # Get updated user data
         user_doc = await db.users.find_one({"id": user_id})
