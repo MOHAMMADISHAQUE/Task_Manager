@@ -53,12 +53,12 @@ const Signup = () => {
     
     if (result.success) {
       toast({
-        title: "Account Created!",
-        description: "Welcome to SmartTask AI. You are now logged in.",
+        title: "Account created successfully!",
+        description: "Welcome to SmartTask AI! Let's set up your workspace.",
       });
       
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
+      // Redirect to welcome page for new users
+      window.location.href = '/welcome';
     } else {
       toast({
         title: "Signup Failed",
