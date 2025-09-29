@@ -55,11 +55,11 @@ const Login = () => {
     setEmergentLoading(true);
     
     try {
-      // Redirect directly to dashboard after auth
-      const dashboardUrl = window.location.origin + '/dashboard';
+      // Redirect to callback page to handle auth processing
+      const callbackUrl = window.location.origin + '/auth/callback';
       
       // Redirect to Emergent Auth
-      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(dashboardUrl)}`;
+      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(callbackUrl)}`;
       window.location.href = authUrl;
     } catch (error) {
       toast({
