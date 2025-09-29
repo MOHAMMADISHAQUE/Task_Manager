@@ -149,7 +149,7 @@ const Dashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 animate-fade-in-up stagger-children">
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-all duration-300 hover:scale-105 animate-fade-in-up">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
             <CheckSquare className="h-4 w-4 text-blue-600" />
