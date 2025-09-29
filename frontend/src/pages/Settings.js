@@ -394,10 +394,10 @@ const Settings = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Notification Channels */}
-          <div>
+          <div className="space-y-1">
             <h4 className="font-medium mb-4">Notification Channels</h4>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between py-3">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-gray-500" />
                   <div>
@@ -411,7 +411,7 @@ const Settings = () => {
                 />
               </div>
               
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
                   <Smartphone className="h-4 w-4 text-gray-500" />
                   <div>
@@ -425,7 +425,7 @@ const Settings = () => {
                 />
               </div>
               
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
                   <Globe className="h-4 w-4 text-gray-500" />
                   <div>
