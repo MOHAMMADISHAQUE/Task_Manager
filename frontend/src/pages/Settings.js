@@ -48,6 +48,7 @@ const Settings = () => {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
