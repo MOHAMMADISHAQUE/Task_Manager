@@ -162,7 +162,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-all duration-300 hover:scale-105 animate-fade-in-up animation-delay-100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Completed</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
