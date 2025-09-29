@@ -465,36 +465,14 @@ const Settings = () => {
             {profile.auth_provider === 'email' ? (
               <ChangePasswordDialog>
                 <Button variant="outline" className="justify-start w-full sm:w-auto">
-                  Change Password
+                  {t('settings.changePassword')}
                 </Button>
               </ChangePasswordDialog>
             ) : (
-              <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg">
+              <div className="text-sm text-gray-500 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 Password change is not available for Google authentication users
               </div>
             )}
-            
-            <Button 
-              variant="outline" 
-              className="justify-start w-full sm:w-auto"
-              onClick={() => toast({
-                title: "Coming Soon",
-                description: "Two-factor authentication will be available soon",
-              })}
-            >
-              Two-Factor Authentication
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="justify-start w-full sm:w-auto"
-              onClick={() => toast({
-                title: "Login History",
-                description: "You can view your recent login activity",
-              })}
-            >
-              Login History
-            </Button>
             
             <Button 
               variant="outline" 
@@ -505,7 +483,7 @@ const Settings = () => {
                 variant: "destructive",
               })}
             >
-              Delete Account
+              {t('settings.deleteAccount')}
             </Button>
           </div>
         </CardContent>
