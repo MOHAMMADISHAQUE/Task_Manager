@@ -195,49 +195,62 @@ const Welcome = () => {
             </div>
 
             {/* Features Preview */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">What you'll get:</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>AI-powered task creation</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Smart notifications</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Project management</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Analytics & insights</span>
-                </div>
+            <div className={`relative overflow-hidden bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 transform transition-all duration-700 ${
+              mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`} style={{ animationDelay: '800ms' }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
+              <h4 className="relative font-bold text-white mb-4 text-center">✨ What you'll get:</h4>
+              <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                {[
+                  { icon: "🤖", text: "AI-powered task creation", delay: "900ms" },
+                  { icon: "🔔", text: "Smart notifications", delay: "1000ms" },
+                  { icon: "📊", text: "Project management", delay: "1100ms" },
+                  { icon: "📈", text: "Analytics & insights", delay: "1200ms" }
+                ].map((feature, index) => (
+                  <div 
+                    key={index}
+                    className={`flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105 ${
+                      mounted ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
+                    }`}
+                    style={{ animationDelay: feature.delay }}
+                  >
+                    <span className="text-lg animate-bounce" style={{ animationDelay: feature.delay }}>{feature.icon}</span>
+                    <span className="text-white/90 font-medium">{feature.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Action Button */}
-            <Button 
-              onClick={handleSetupWorkspace}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-base font-medium"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Setting up your workspace...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  Get Started
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-              )}
-            </Button>
+            <div className={`transform transition-all duration-700 ${
+              mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`} style={{ animationDelay: '1300ms' }}>
+              <Button 
+                onClick={handleSetupWorkspace}
+                disabled={loading}
+                className="relative w-full h-14 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:via-pink-500 hover:to-purple-500 text-white text-lg font-bold rounded-xl shadow-2xl shadow-purple-500/50 border border-white/20 overflow-hidden group transform hover:scale-105 transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/50 to-pink-600/50 animate-pulse"></div>
+                {loading ? (
+                  <div className="relative flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span className="animate-pulse">Setting up your cosmic workspace...</span>
+                  </div>
+                ) : (
+                  <div className="relative flex items-center gap-3">
+                    <Rocket className="h-5 w-5 animate-bounce" />
+                    <span>Launch Your Journey</span>
+                    <ArrowRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
+                )}
+              </Button>
+            </div>
 
-            <p className="text-xs text-gray-500 text-center">
-              You can always customize your workspace later in Settings
+            <p className={`text-xs text-white/60 text-center transform transition-all duration-700 ${
+              mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`} style={{ animationDelay: '1400ms' }}>
+              ✨ You can always customize your workspace later in Settings
             </p>
           </CardContent>
         </Card>
